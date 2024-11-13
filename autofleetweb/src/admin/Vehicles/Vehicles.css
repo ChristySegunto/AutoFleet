@@ -1,3 +1,134 @@
-.Vehicles{
-    margin: 10px;
+/* src/admin/Vehicles/Vehicles.css */
+
+.vehicles-container {
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.top-ribbon {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff6a18; 
+}
+
+.vehicle-header {
+  background-color: #ffffff; 
+  color: #ff6a18; 
+}
+
+.vehicle-header h2 {
+  margin: 0;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.list-header {
+  font-size: 20px;
+  font-weight: normal;
+  color: #a2a2a2;
+  margin: 0;
+}
+
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.export-btn,
+.add-vehicle-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.export-btn {
+  background-color: #ffddc1; 
+  color: #ff6a18; 
+}
+
+.add-vehicle-btn {
+  background-color: #c1d8ff; 
+  color: #1c4587; 
+}
+
+/* Table Styling */
+.table-container {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+  color: #a2a2a2;
+}
+
+th {
+  background-color: #efefef;
+  font-weight: bold;
+}
+
+.status {
+  min-width: 90px;
+  padding: 6px 12px;
+  border-radius: 20px; 
+  text-align: center;
+  display: inline-block;
+  font-size: 13px; 
+  line-height: normal;
+}
+
+.status.repair {
+  background-color: #ffd9d9; 
+  color: #cc3c3c;
+}
+
+.status.inactive {
+  background-color: #e6e6e6; 
+  color: #767676;
+}
+
+.status.active {
+  background-color: #d1f1b9; 
+  color: #68b031;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: none;
+  background-color: #efefef;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background-color: #ff6a18; 
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import './Login.css'
 import { useNavigate } from 'react-router-dom'; // Import Redirect from React Router
 
@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'; // Import Redirect from React Ro
 //Bootstrap
 import { Form, Button, Alert, Modal, Container } from 'react-bootstrap';
 import logo from './../img/logo.png';
-import { useAuth } from "../settings/AuthContext";
+import { AuthContext } from "../settings/AuthContext";
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -14,7 +14,8 @@ const Login = () => {
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, setAdminDetails } = useContext(AuthContext);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -46,7 +47,14 @@ const Login = () => {
 
             // Check the role and navigate accordingly
             if (data.role === 'admin') {
-                login({ email: data.Email, role: data.Role }); // Save user data in context
+                login({ 
+                    email: data.email, 
+                    role: data.role,
+                    user_id: data.userId,
+                    token: data.token 
+                }); 
+
+                alert('Login Successful.')
                 navigate('/dashboard'); // Navigate to dashboard for admin
             } else {
                 setError('You do not have access to this application.'); // Set error for non-admin roles

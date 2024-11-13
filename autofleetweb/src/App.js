@@ -23,6 +23,7 @@ import Vehicles from './admin/Vehicles/Vehicles.js';
 import Drivers from './admin/Drivers/Drivers.js';
 import Maptracking from './admin/Maptracking/Maptracking.js';
 import Settings from './admin/Settings/Settings.js';
+import Maintenance from './admin/Maintenance/Maintenance.js';
 
 const router =createBrowserRouter(
   createRoutesFromElements(
@@ -76,6 +77,18 @@ const router =createBrowserRouter(
               <div className='web-container'>
                 <Sidebar/>
                 <Maptracking/>
+              </div>
+          
+        }
+      />
+
+      <Route
+        path="maintenance"
+        element={
+         
+              <div className='web-container'>
+                <Sidebar/>
+                <Maintenance/>
               </div>
           
         }
