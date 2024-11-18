@@ -1,47 +1,50 @@
 /* src/admin/Vehicles/Vehicles.css */
 
 .vehicles-container {
+  margin: 20px;
   background-color: #FFFAF7;
-  padding: 1.5rem 2rem;
   width: 100%;
 }
 
 .top-ribbon {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  /* align-items: center; */
   width: 100%;
   margin-bottom: 1rem;
 }
 
 .left-side {
   display: flex;
-  flex-direction: column; /* Aligns vehicle-header and <p> vertically */
-  align-items: flex-start; /* Left aligns the text */
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: #fff;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
 }
 
 .header-text {
   display: flex;
-  flex-direction: column; /* Stacks the text vertically */
+  flex-direction: column;
 }
 
 .right-side {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  /* align-items: center; */
+  background-color: #fff;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
 }
 
 .vehicle-header {
-  color: #ff6a18; 
+  color: #ff6a18;
 }
 
 .vehicle-header p {
   margin: 0;
 }
 
-.vehicle-header h2 {
-  font-weight: bold;
-  font-size: 2rem;
+.vehicle-header h1 {
   margin: 0;
 }
 
@@ -77,13 +80,13 @@
 }
 
 .export-btn {
-  background-color: #ffddc1; 
-  color: #ff6a18; 
+  background-color: #ffddc1;
+  color: #ff6a18;
 }
 
 .add-vehicle-btn {
-  background-color: #c1d8ff; 
-  color: #1c4587; 
+  background-color: #c1d8ff;
+  color: #1c4587;
 }
 
 /* Table Styling */
@@ -100,7 +103,7 @@ table {
 
 th,
 td {
-  padding: 12px;
+  padding: 5px;
   text-align: center;
   font-size: 14px;
   color: #a2a2a2;
@@ -108,31 +111,31 @@ td {
 
 th {
   border-bottom: #a2a2a2 1px solid;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .status {
   min-width: 90px;
   padding: 6px 12px;
-  border-radius: 20px; 
+  border-radius: 20px;
   text-align: center;
   display: inline-block;
-  font-size: 13px; 
+  font-size: 13px;
   line-height: normal;
 }
 
 .status.repair {
-  background-color: #ffd9d9; 
+  background-color: #ffd9d9;
   color: #cc3c3c;
 }
 
 .status.inactive {
-  background-color: #e6e6e6; 
+  background-color: #e6e6e6;
   color: #767676;
 }
 
 .status.active {
-  background-color: #d1f1b9; 
+  background-color: #d1f1b9;
   color: #68b031;
 }
 
@@ -153,7 +156,7 @@ th {
 }
 
 .pagination button:hover {
-  background-color: #ff6a18; 
+  background-color: #ff6a18;
 }
 
 .action-icons {
@@ -173,7 +176,7 @@ th {
 }
 
 .action-btn:hover {
-  color: #ff6a18; /* Change icon color on hover */
+  color: #ff6a18;
 }
 
 .vehicle-row {
@@ -181,5 +184,70 @@ th {
 }
 
 .vehicle-row:hover {
-  background-color:#efefef;
+  background-color: #efefef;
+}
+
+/* Additional specific table styles */
+.vehicle-table-container {
+  padding: 20px;
+}
+
+.vehicle-table-container thead tr {
+  border: #D3D3D3;
+}
+
+.vehicle-table-container thead tr th {
+  color: #A2A2A2;
+  font-family: Poppins;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+}
+
+.vehicle-table-container tbody tr td {
+  color: #A6A6A6;
+  font-family: Quicksand;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+}
+
+/* Modal styles */
+.modal-vehicle {
+  border: 0;
+}
+
+.modal-vehicle-title {
+  color: #FF8C4C !important;
+  font-family: Poppins;
+  font-style: normal;
+  font-size: x-large;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.modal-vehicle-formgroup {
+  margin-bottom: 20px;
+}
+
+.modal-vehicle-label {
+  margin: 0;
+  font-family: Poppins;
+  font-weight: 300;
+}
+
+.modal-vehicle-control {
+  color: #767676;
+}
+
+.modal-vehicle-save {
+  background-color: #094985;
+  color: #FFF;
+  border: 0;
+}
+
+.modal-vehicle-close {
+  border: 0;
 }
