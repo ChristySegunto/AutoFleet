@@ -63,7 +63,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchAdminDetails = async () => {
       try {
-        const response = await fetch(`https://localhost:7192/api/Users/get-admin-details?userId=${user.user_id}`);
+        const response = await fetch(`http://localhost:5127/api/Users/get-admin-details?userId=${user.user_id}`);
         if (response.ok) {
           const data = await response.json();
           console.log("Admin Data:", data); // Check if data is logged correctly
@@ -84,7 +84,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchTotalCars = async () => {
       try {
-        const response = await fetch('https://localhost:7192/api/Vehicles/Count'); // Your API to get total cars
+        const response = await fetch('http://localhost:5127/api/Vehicles/Count'); // Your API to get total cars
         if (response.ok) {
           const data = await response.json();
           setTotalCars(data); // Set the total cars count
@@ -103,7 +103,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchFleetStatus = async () => {
       try {
-        const response = await fetch('https://localhost:7192/api/Vehicles/StatusCount'); // Replace with your API endpoint
+        const response = await fetch('http://localhost:5127/api/Vehicles/StatusCount'); // Replace with your API endpoint
         if (response.ok) {
           const data = await response.json();
           setAvailable(data.available);  // Assuming the response contains available count
@@ -123,7 +123,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchCategoryCount = async () => {
       try {
-        const response = await fetch('https://localhost:7192/api/Vehicles/CategoryCount'); // Replace with your API endpoint
+        const response = await fetch('http://localhost:5127/api/Vehicles/CategoryCount'); // Replace with your API endpoint
         if (response.ok) {
           const data = await response.json();
           setSUV(data.suv);  // Assuming the response contains available count
