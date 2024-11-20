@@ -170,7 +170,7 @@ function Maptracking() {
                         className="map-container"
                     ></div>
 
-                    {/* Display selected trip's details on top of the map */}
+                    
                     {selectedTrip && (
                         <div className="selected-trip-overlay">
                             <Card className="selected-trip-card mb-3">
@@ -188,7 +188,7 @@ function Maptracking() {
                                         <p><strong>Renter:</strong> {selectedTrip.renterName}</p>
                                         <p><strong>Rent Period:</strong> {selectedTrip.rentStartDate} to {selectedTrip.rentEndDate}</p>
                                     </div>
-                                    {/* You can add more UI elements here */}
+                                    
                                 </Card.Body>
                             </Card>
                         </div>
