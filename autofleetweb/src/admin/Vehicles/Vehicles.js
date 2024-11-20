@@ -6,7 +6,7 @@ import { AuthContext } from './../../settings/AuthContext.js';
 import './Vehicles.css';
 
 const Vehicles = () => {
-  const {user} = useContext(AuthContext); // Access user and setAdminDetails from context
+  const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add', 'view', 'edit'
@@ -130,15 +130,13 @@ const Vehicles = () => {
         <div className="left-side">
           <div className="vehicle-header">
             <h1>VEHICLES RECORD</h1>
-            <p>Welcome Back, {user?.email}</p>
+            <p>Welcome Back, {adminDetails?.fname}</p>
           </div>
         </div>
-        <div className="right-side">
-          <Button className='notif-button'><FaBell /></Button>
-          <Button className='search-button'><FaSearch /></Button>
+        <div className='header-button'>
           <Button className='user-button'>
             <div className='user-icon'><FaUser /></div> 
-            Someone else
+            {adminDetails?.fname} {adminDetails?.lname}
           </Button>
         </div>
       </div>
@@ -147,7 +145,7 @@ const Vehicles = () => {
         <h3 className="list-header">LIST OF VEHICLES</h3>
         <div className="action-buttons">
           <button className="export-btn">EXPORT</button>
-          <Button className='add-vehicle' onClick={handleShow}>
+          <Button className='add-vehicle-btn' onClick={handleShow}>
             ADD VEHICLE
           </Button>
         </div>
