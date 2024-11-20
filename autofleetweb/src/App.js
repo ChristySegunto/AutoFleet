@@ -28,7 +28,12 @@ import Maintenance from './admin/Maintenance/Maintenance.js';
 const router =createBrowserRouter(
   createRoutesFromElements(
     <Route path = "/"  >
-      <Route index element={<Login />}></Route>
+      <Route index element={
+         <div className='web-container'>
+         <Sidebar/>
+         <Maptracking/>
+       </div>
+      }></Route>
       <Route 
         path = "login" 
         element={<Login />}>

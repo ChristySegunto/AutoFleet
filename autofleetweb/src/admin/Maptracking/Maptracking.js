@@ -1,23 +1,108 @@
-import { Form, Button, Container, Row, Col, InputGroup, Card } from 'react-bootstrap';
-import { FaBell, FaSearch, FaUserCircle } from 'react-icons/fa';
+import React, { useEffect, useRef, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
+import { Form, Button, Container, Row, Col, Card, Modal } from 'react-bootstrap';
+import { FaBell, FaSearch, FaUserCircle, FaPlus } from 'react-icons/fa';
+import { database } from './firebase';
+import { ref, push, onValue } from 'firebase/database';
 import './Maptracking.css';
 
 function Maptracking() {
-    const username = "User"; 
+    const username = "User";
+    const mapContainerRef = useRef(null);
+    const [trips, setTrips] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newTrip, setNewTrip] = useState({
+        shippingNumber: '',
+        source: '',
+        destination: '',
+        totalDistance: '',
+        fuelConsumption: '',
+        renterName: '',
+        rentStartDate: '',
+        rentEndDate: ''
+    });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredTrips, setFilteredTrips] = useState([]);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+
+    // Filter trips based on the search query
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setFilteredTrips(trips);
+        } else {
+            const lowerCaseQuery = searchQuery.toLowerCase();
+            const filtered = trips.filter(trip =>
+                trip.shippingNumber.toLowerCase().includes(lowerCaseQuery) ||
+                trip.source.toLowerCase().includes(lowerCaseQuery) ||
+                trip.destination.toLowerCase().includes(lowerCaseQuery)
+            );
+            setFilteredTrips(filtered);
+        }
+    }, [searchQuery, trips]);
+
+    // Fetch trips from Firebase
+    useEffect(() => {
+        const tripsRef = ref(database, 'trips');
+        onValue(tripsRef, (snapshot) => {
+            const data = snapshot.val();
+            const tripsArray = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+            setTrips(tripsArray);
+        });
+    }, []);
+
+    // Initialize Mapbox
+    useEffect(() => {
+        mapboxgl.accessToken = 'pk.eyJ1Ijoicm9jaGVsbGVib3JyIiwiYSI6ImNtM29rejZnazA0Z3Mya3NkZ2g4YXd5cnIifQ.4Pso-euXHqkZMUmz7Dpegw';
+
+        const map = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            style: 'mapbox://styles/mapbox/navigation-night-v1',
+            center: [121.11472431559307, 14.648879098920109],
+            zoom: 15,
+        });
+
+        map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+        return () => map.remove();
+    }, []);
+
+    // Handle Modal Inputs
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setNewTrip(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Save new trip to Firebase
+    const addTrip = () => {
+        const tripsRef = ref(database, 'trips');
+        push(tripsRef, newTrip);
+        setNewTrip({
+            shippingNumber: '',
+            source: '',
+            destination: '',
+            totalDistance: '',
+            fuelConsumption: '',
+            renterName: '',
+            rentStartDate: '',
+            rentEndDate: ''
+        });
+        setShowModal(false);
+    };
+
+    // Handle clicking a trip card
+    const handleCardClick = (trip) => {
+        setSelectedTrip(trip); // Set the selected trip to show detailed info
+    };
 
     return (
         <Container fluid className="Maptracking">
             {/* Header Section */}
             <Row className="align-items-center justify-content-between mb-3">
-                {/* Left Section */}
                 <Col xs="auto">
                     <h3 className="title-text mb-0">MAP TRACKING</h3>
                     <p className="subtitle-text">Welcome back, {username}!</p>
                 </Col>
-
-                {/* Right Section */}
                 <Col xs="auto" className="d-flex align-items-center">
-                    
                     <Button variant="link" className="icon-button">
                         <div className="icon-circle">
                             <FaBell size={20} />
@@ -28,8 +113,6 @@ function Maptracking() {
                             <FaSearch size={20} />
                         </div>
                     </Button>
-
-                    {/* Profile Section */}
                     <div className="profile-section d-flex align-items-center ms-3">
                         <FaUserCircle size={30} className="user-icon" />
                         <span className="ms-2 user-text">{username}</span>
@@ -37,56 +120,179 @@ function Maptracking() {
                 </Col>
             </Row>
 
-            {/* Divider */}
             <hr className="divider" />
 
             {/* Main Content Section */}
             <Row className="main-content">
-                {/* Search Box */}
                 <Col md={3} className="search-box">
-                    <Form>
-                        <Form.Group controlId="search">
-                            <Form.Label>Search Location</Form.Label>
-                            <InputGroup>
-                                <InputGroup.Text className="search-icon">
-                                    <FaSearch />
-                                </InputGroup.Text>
-                                <Form.Control type="text" placeholder="Enter location" />
-                            </InputGroup>
-                        </Form.Group>
-                    </Form>
+                    {/* Search Bar */}
+                    <Form.Group controlId="searchTrips">
+                        <Form.Control
+                            type="text"
+                            placeholder="Search trips..."
+                            className="mb-3"
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </Form.Group>
 
-                    {/* Trip Cards */}
-                    <Card className="trip-card mb-3 mt-3">
-                        <Card.Body>
-                            <Card.Title>Shipping Number</Card.Title>
-                            <Card.Subtitle className="mb-2 text-muted">ENV-Y7483929420</Card.Subtitle>
-                            <div className="location-info">
-                                <p><i className="fas fa-map-marker-alt"></i> Gilmore Tower</p>
-                                <p><i className="fas fa-map-marker-alt"></i> PLM Campus</p>
-                                <p>5.7km Trip Mileage</p>
-                                <p>0.65L Fuel Consumption</p>
-                            </div>
-                        </Card.Body>
-                    </Card>
+                    <h1>ONGOING TRIPS</h1>
+                    <Button
+                        variant="primary"
+                        className="mb-3"
+                        onClick={() => setShowModal(true)}
+                    >
+                        <FaPlus className="me-2" /> Add Trip
+                    </Button>
+                    {filteredTrips.map(trip => (
+                        <Card key={trip.id} className="trip-card mb-3" onClick={() => handleCardClick(trip)}>
+                            <Card.Body>
+                                <Card.Title>Trip Number</Card.Title>
+                                <Card.Subtitle className="mb-2 text-muted">{trip.shippingNumber}</Card.Subtitle>
+                                <div className="location-info">
+                                    <p><i className="fas fa-map-marker-alt"></i> {trip.source}</p>
+                                    <p><i className="fas fa-map-marker-alt"></i> {trip.destination}</p>
+                                </div>
+                                <div className="trip-details">
+                                    <p><strong>Total Distance:</strong> {trip.totalDistance} km</p>
+                                    <p><strong>Fuel Consumption:</strong> {trip.fuelConsumption} liters</p>
+                                    <p><strong>Renter:</strong> {trip.renterName}</p>
+                                    <p><strong>Rent Period:</strong> {trip.rentStartDate} to {trip.rentEndDate}</p>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    ))}
                 </Col>
 
-                {/* Map */}
                 <Col md={9} className="map-display">
-                    <div style={{ width: '100%', height: '500px' }}>
-                       
-                        <iframe
-                            title="Google Map"
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345093775!2d144.95373531550424!3d-37.81627944202106!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d43cda0b1bd%3A0x5045675218ce7e33!2z5Zu-54us5ZyL56We5aSn5a246YeR6KaL!5e0!3m2!1szh-CN!2sau!4v1642125664995!5m2!1szh-CN!2sau"
-                            width="100%"
-                            height="100%"
-                            style={{ border: 0 }}
-                            allowFullScreen=""
-                            loading="lazy"
-                        ></iframe>
-                    </div>
+                    <div
+                        ref={mapContainerRef}
+                        style={{ width: '100%', height: '800px' }}
+                        className="map-container"
+                    ></div>
+
+                    
+                    {selectedTrip && (
+                        <div className="selected-trip-overlay">
+                            <Card className="selected-trip-card mb-3">
+                                <Card.Body>
+                                    <Card.Title className='card-title'>Trip Details</Card.Title>
+                                    <Card.Subtitle className="card-subtitle">{selectedTrip.shippingNumber}</Card.Subtitle>
+                                    <div className="location-info">
+                                        <p><i className="fas fa-map-marker-alt"></i> {selectedTrip.source}</p>
+                                        <p><i className="fas fa-map-marker-alt"></i> {selectedTrip.destination}</p>
+                                    </div>
+                                    <hr className="divider" />
+                                    <div className="trip-details">
+                                        <p><strong>Total Distance:</strong> {selectedTrip.totalDistance} km</p>
+                                        <p><strong>Fuel Consumption:</strong> {selectedTrip.fuelConsumption} liters</p>
+                                        <p><strong>Renter:</strong> {selectedTrip.renterName}</p>
+                                        <p><strong>Rent Period:</strong> {selectedTrip.rentStartDate} to {selectedTrip.rentEndDate}</p>
+                                    </div>
+                                    
+                                </Card.Body>
+                            </Card>
+                        </div>
+                    )}
+
                 </Col>
             </Row>
+
+            {/* Add Trip Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add New Trip</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Trip Number</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="shippingNumber"
+                                value={newTrip.shippingNumber}
+                                onChange={handleChange}
+                                placeholder="Enter trip number"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-3">
+                            <Form.Label>Source</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="source"
+                                value={newTrip.source}
+                                onChange={handleChange}
+                                placeholder="Enter source location"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-3">
+                            <Form.Label>Destination</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="destination"
+                                value={newTrip.destination}
+                                onChange={handleChange}
+                                placeholder="Enter destination location"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-3">
+                            <Form.Label>Total Distance</Form.Label>
+                            <Form.Control
+                                type="number"
+                                name="totalDistance"
+                                value={newTrip.totalDistance}
+                                onChange={handleChange}
+                                placeholder="Enter total distance (in km)"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-3">
+                            <Form.Label>Fuel Consumption</Form.Label>
+                            <Form.Control
+                                type="number"
+                                name="fuelConsumption"
+                                value={newTrip.fuelConsumption}
+                                onChange={handleChange}
+                                placeholder="Enter fuel consumption (in liters)"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-3">
+                            <Form.Label>Renter Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="renterName"
+                                value={newTrip.renterName}
+                                onChange={handleChange}
+                                placeholder="Enter renter's name"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-3">
+                            <Form.Label>Rent Start Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="rentStartDate"
+                                value={newTrip.rentStartDate}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-3">
+                            <Form.Label>Rent End Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="rentEndDate"
+                                value={newTrip.rentEndDate}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                        Close
+                    </Button>
+                    <Button variant="primary" onClick={addTrip}>
+                        Save Trip
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 }
