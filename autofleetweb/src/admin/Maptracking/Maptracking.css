@@ -62,28 +62,102 @@
 }
 
 .search-box {
-    padding: 10px;
-    background-color: #f8f9fa;
+    padding: 20px;
+    background-color: #fffaf7;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better appearance */
 }
 
 .search-icon {
     background-color: #ffffff;
     border: none;
     color: #6c757d;
+    font-size: 1.5em;  /* Increase icon size */
+    padding: 10px; /* Add padding around the icon */
 }
+
+.search-box .form-control {
+    font-size: 1.2em;  /* Increase input font size */
+    padding: 10px;  /* Add padding for bigger input box */
+    border-radius: 10px; /* Round the corners for the input field */
+}
+
+.search-box .form-group {
+    margin-bottom: 1em;
+}
+
 
 .map-display {
     display: flex;
     align-items: center;
     justify-content: center;
 }
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
 
 .trip-card {
-    background-color: #f8f9fa; 
+    background-color: #ffffff; 
     border: 1px solid #dee2e6; 
 }
 
 .location-info p {
     margin: 0;
     color: #6c757d; 
+}
+
+h1{
+    padding-top:5px;
+    color: #023047;
+}
+
+map-container{
+    height:100px;
+    width:150px;
+}
+
+.selected-trip-overlay {
+    position: absolute;
+    top: 200px; /* Adjust as needed */
+    right: 10px;
+    transform: translateX(-50%);
+    z-index: 10; /* Ensure it stays on top of the map */
+    width: 80%; /* Adjust width */
+    max-width: 400px; /* Set a max width */
+
+    padding: 10px;
+  
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    max-height: 80vh; /* Prevent overflow beyond the viewport */
+}
+
+.selected-trip-card {
+    border-radius: 8px; /* Rounded corners for the card */
+    box-shadow: none; /* Remove card shadow */
+}
+
+.selected-trip-card .location-info p,
+.selected-trip-card .trip-details p {
+    font-size: 17px;
+    margin-bottom: 8px;
+    color: #023047;
+}
+
+.selected-trip-card .trip-details p strong {
+    font-weight: bold;
+    color: #023047;
+}
+
+.selected-trip-card .card-title{
+    color:#023047;
+    font-weight:bold;
+}
+
+.selected-trip-card .card-subtitle{
+    color:#ff6a18;
+    font-size:30px;
 }
