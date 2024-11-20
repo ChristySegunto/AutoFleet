@@ -31,6 +31,9 @@ function Dashboard() {
   const [van, setVan] = useState(0);
   const [sedan, setSedan] = useState(0);
 
+  const [fname, setFname] = useState();
+  const [lname, setLname] = useState();
+
   const fleetstatusdata = {
     labels: ['SUV', 'Van', 'Sedan'],
     datasets: [
@@ -68,6 +71,8 @@ function Dashboard() {
           const data = await response.json();
           console.log("Admin Data:", data); // Check if data is logged correctly
           setAdminDetails({ fname: data.firstName, lname: data.lastName });
+          setFname(adminDetails.fname);
+          setLname(adminDetails.lname);
         } else {
           setError('Failed to fetch admin details.');
         }
@@ -75,6 +80,8 @@ function Dashboard() {
         setError('Error fetching admin details: ' + error.message);
       } 
     };
+
+    fetchAdminDetails();
 
     if (user?.user_id) {
       fetchAdminDetails();
@@ -148,12 +155,12 @@ function Dashboard() {
       <div className='header-dashboard'>
         <div className='header-row'>
           <h1>DASHBOARD</h1>
-          <p>Welcome Back, {adminDetails.fname}</p>
+          <p>Welcome Back, {adminDetails?.fname || "User"}</p>
         </div>
         <div className='header-button'>
           <Button className='user-button'>
             <div className='user-icon'><FaUser /></div> 
-            {adminDetails.fname} {adminDetails.lname}
+            {adminDetails?.fname} {adminDetails?.lname }
           </Button>
         </div>
       </div>
