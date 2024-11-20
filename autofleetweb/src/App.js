@@ -99,7 +99,7 @@ const router =createBrowserRouter(
         }
       />
 
-      <Route
+      {/* <Route
         path="settings"
         element={
           <RequireAuth>
@@ -109,7 +109,7 @@ const router =createBrowserRouter(
               </div>
           </RequireAuth>
         }
-      />
+      /> */}
 
     </Route>
   )

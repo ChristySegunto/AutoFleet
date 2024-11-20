@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Form, Button, Alert, Modal, Container } from 'react-bootstrap';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Drivers.css';
+import { AuthContext } from './../../settings/AuthContext.js';
+
 
 const Drivers = () => {
+  const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
@@ -123,9 +126,9 @@ const Drivers = () => {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <div>
-            <h1 className="company-logo">RENT SCHEDULE</h1>
-            <p className="welcome-text">Welcome Back, John!</p>
+          <div className="vehicle-header">
+            <h1>RENT SCHEDULE</h1>
+            <p>Welcome Back, {adminDetails?.fname}</p>
           </div>
           <div className="header-actions">
             <div className="icon-container">
