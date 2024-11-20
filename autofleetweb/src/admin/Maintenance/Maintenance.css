@@ -1,0 +1,135 @@
+.Maintenance{
+    margin: 20px;
+    width: 100%;
+    background-color: #FFFAF7;
+}
+
+.Maintenance .header-maintenance{
+    display: flex;
+    justify-content: space-between; 
+}
+
+.Maintenance .header-button{
+    display: flex;
+}
+
+.Maintenance .header-row{
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start !important;
+    margin: 0;
+}
+
+.Maintenance .maintenance-title{
+    margin: 0;
+    border-radius: 15px;
+    background: #FFF;
+    box-shadow: 0px 4px 40px 6px rgba(0, 0, 0, 0.02);
+    margin-top: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.Maintenance .maintenance-title h4{
+    color: #767676;
+    font-family: Quicksand;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin: 0;
+}
+
+.Maintenance .maintenance-title .h4-placing{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.maintenance-title .btn{
+    display: flex;
+    justify-content: end;
+}
+
+.Maintenance .add-maintenance{
+    background-color: #C2DDFF;
+    color: #477BBE;
+    border: 0;
+}
+
+.Maintenance .add-maintenance:hover{
+    background-color: #94c4ff;
+    color: #477BBE;
+    border: 0;
+}
+
+.maintenance-table {
+    margin: 0;
+    margin-top: 20px;
+    border-radius: 15px; /* Rounded corners for the entire table container */
+    background-color: #fff;
+}
+
+.maintenance-table-container{
+    padding: 20px;
+}
+
+.maintenance-table-container thead tr{
+    border: #D3D3D3;
+}
+
+.maintenance-table-container thead tr th{
+    color: #A2A2A2;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+}
+
+.maintenance-table-container tbody tr td{
+    color: #A6A6A6;
+    font-family: Quicksand;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+}
+
+.modal-maintenance{
+    border: 0;
+}
+
+.modal-maintenance-title{
+    color: #FF8C4C !important;
+    font-family: Poppins;
+    font-style: normal;
+    font-size: x-large;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.modal-maintenance-formgroup{
+    margin-bottom: 20px;
+}
+
+.modal-maintenance-label{
+    margin: 0;
+    font-family: Poppins;
+    font-weight: 300;
+}
+
+.modal-maintenance-control{
+    color: #767676;
+}
+
+.modal-maintenance-save{
+    background-color: #094985;
+    color: #FFF;
+    border: 0;
+}
+
+.modal-maintenance-close{
+    border: 0;
+}

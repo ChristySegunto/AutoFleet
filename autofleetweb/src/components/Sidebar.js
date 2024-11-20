@@ -19,6 +19,19 @@ import Col from 'react-bootstrap/Col';
 import logo from './../img/logo.png';
 
 const Sidebar = () => {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await logout(); // Logout the user
+            navigate('/login'); // Redirect to login page after logout
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Handle any logout error if needed
+        }
+    };
+
     return(
         <div className='sidebar'>
             <CDBSidebar className="custom-sidebar">
@@ -41,10 +54,13 @@ const Sidebar = () => {
                         <CDBSidebarMenuItem icon="car">Vehicles</CDBSidebarMenuItem>
                     </NavLink>
                     <NavLink exact to="/drivers" className={({ isActive }) => (isActive ? "activeClicked" : "")}>
-                        <CDBSidebarMenuItem icon="user">Drivers</CDBSidebarMenuItem>
+                        <CDBSidebarMenuItem icon="calendar">Rent</CDBSidebarMenuItem>
                     </NavLink>
                     <NavLink exact to="/maptracking" className={({ isActive }) => (isActive ? "activeClicked" : "")}>
                         <CDBSidebarMenuItem icon="map">Map Tracking</CDBSidebarMenuItem>
+                    </NavLink>
+                    <NavLink exact to="/maintenance" className={({ isActive }) => (isActive ? "activeClicked" : "")}>
+                        <CDBSidebarMenuItem icon="wrench">Maintenance</CDBSidebarMenuItem>
                     </NavLink>
                     <NavLink exact to="/settings" className={({ isActive }) => (isActive ? "activeClicked" : "")}>
                         <CDBSidebarMenuItem icon="cog">Settings</CDBSidebarMenuItem>
@@ -56,10 +72,15 @@ const Sidebar = () => {
         
                 <CDBSidebarFooter className='sidebar-content-footer'>
                     <div className='sidebar-footer'>
-                        <div className="divider"></div> 
-                        <NavLink exact to="/logout" activeClassName="activeClicked">
-                            <CDBSidebarMenuItem icon="door-open" className='custom-footer'>Logout</CDBSidebarMenuItem>
-                        </NavLink>
+                        <div className="divider"></div>
+                        {/* Remove NavLink and use a regular click handler for logout */}
+                        <CDBSidebarMenuItem
+                            icon="door-open"
+                            className='custom-footer'
+                            onClick={handleLogout}
+                        >
+                            Logout
+                        </CDBSidebarMenuItem>
                     </div>
                 </CDBSidebarFooter>
             </CDBSidebar>

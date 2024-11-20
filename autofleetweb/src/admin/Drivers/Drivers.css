@@ -1,0 +1,341 @@
+.drivers-container {
+    min-height: 100vh;
+    background-color: #f9fafb;
+    width: 100%;
+  }
+  
+  /* Header Styles */
+  .header {
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem 2rem;
+    width: 100%;
+  }
+  
+  .header-content {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .company-logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #FF6A18;
+    margin-bottom: 0.5rem;
+  }
+  
+  .welcome-text {
+    color: #FF6A18;
+    font-size: 1.1rem;
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    }
+
+    .icon-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .notification-container,
+    .search2-container {
+        background-color: #1D3A5F; 
+        border-radius: 50%; 
+        width: 40px; 
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-icon,
+    .search2-icon {
+        color: white; /* White color for the icons */
+        font-size: 1.2rem; /* Adjust size as needed */
+    }
+
+    .admin-dropdown {
+        display: flex;
+        align-items: center;
+        background-color: #FF6A00;
+        padding: 10px 15px;
+        border-radius: 40px;
+        color: white;
+        font-weight: bold;
+        gap: 10px;
+    }
+
+    .admin-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+    }
+
+    .admin-info {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        line-height: 1; /* Adjust line height if needed */
+    }
+
+    .admin-name {
+        font-size: 0.85rem;
+    }
+
+    .admin-label {
+        font-size: 0.75rem;
+        color: white;
+        opacity: 0.8; /* Optional: make it slightly lighter than the name */
+    }
+
+    .dropdown-arrow {
+        font-size: 1rem;
+        color: white;
+    }
+
+  
+  /* Main Content */
+  .main-container {
+    padding: 2rem;
+    width: 100%;
+  }
+  
+  .content-wrapper {
+    display: flex;
+    gap: 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  
+  /* Driver List */
+  .driver-list {
+    width: 35%;
+    min-width: 400px;
+  }
+  
+  .search-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 1rem 3rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.2rem;
+  }
+  
+  .add-schedule-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+  }
+  
+  .add-schedule-btn {
+    background-color: #dbeafe;
+    color: #2563eb;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  .drivers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+    padding-right: 1rem;
+  }
+  
+  .driver-card {
+    background-color: #EBEBEB;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .driver-card:hover {
+    transform: translateX(4px);
+    background-color: #184B87;
+  }
+  
+  .driver-card.selected {
+    background-color: #184B87;
+    color: white;
+  }
+  
+  .driver-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .avatar {
+    font-size: 2rem;
+  }
+  
+  .drivers-name {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .driver-car {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Status Indicators */
+  .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .status-ONGOING::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #22c55e;
+  }
+  
+  .status-COMPLETED::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #c40b0b;
+  }
+  
+  /* Driver Details */
+  .driver-details {
+    width: 65%;
+    min-width: 600px;
+  }
+  
+  .details-card {
+    background-color: #184B87;
+    color: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  .driver-header {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .reg-number {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+  
+  .details-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .info-section {
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+  
+  .photos-section {
+    margin-top: 1.5rem;
+  }
+  
+  .photos-header {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  /* Scrollbar Styling */
+  .drivers-grid::-webkit-scrollbar,
+  .details-card::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .drivers-grid::-webkit-scrollbar-track,
+  .details-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  .drivers-grid::-webkit-scrollbar-thumb,
+  .details-card::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  
+  .drivers-grid::-webkit-scrollbar-thumb:hover,
+  .details-card::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .details-card .info-section,
+    .details-card .photos-section {
+  border-top: 1px solid #cccccc; /* Change color as needed */
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.custom-modal .modal-body {
+  max-height: 70vh; /* Set max height to 70% of the viewport */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds max height */
+  padding: 15px; /* Adjust padding for better appearance */
+}
+
+.custom-modal .modal-dialog {
+  margin: auto;
+  max-width: 800px; /* Adjust width to ensure it fits well */
+  max-height: 90vh; /* Ensure overall modal doesn't exceed screen height */
+}
+
+.modal-body .row {
+  margin-bottom: 10px; /* Compact spacing between rows */
+}
+
+h6 {
+  font-size: 14px; /* Adjust heading size */
+  text-transform: uppercase;
+}
+
+
