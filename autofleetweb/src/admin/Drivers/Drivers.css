@@ -3,11 +3,23 @@
     background-color: #f9fafb;
     width: 100%;
   }
+
+  .drivers-container  .vehicle-header {
+    color: #ff6a18;
+  }
+  
+  .drivers-container .vehicle-header p {
+    margin: 0;
+  }
+  
+  .drivers-container .vehicle-header h1 {
+    margin: 0;
+  }
   
   /* Header Styles */
   .header {
     background-color: white;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #FFFAF7;
     padding: 1.5rem 2rem;
     width: 100%;
   }
