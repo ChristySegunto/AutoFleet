@@ -62,9 +62,9 @@ const Sidebar = () => {
                     <NavLink exact to="/maintenance" className={({ isActive }) => (isActive ? "activeClicked" : "")}>
                         <CDBSidebarMenuItem icon="wrench">Maintenance</CDBSidebarMenuItem>
                     </NavLink>
-                    <NavLink exact to="/settings" className={({ isActive }) => (isActive ? "activeClicked" : "")}>
+                    {/* <NavLink exact to="/settings" className={({ isActive }) => (isActive ? "activeClicked" : "")}>
                         <CDBSidebarMenuItem icon="cog">Settings</CDBSidebarMenuItem>
-                    </NavLink>
+                    </NavLink> */}
 
 
                     </CDBSidebarMenu>
