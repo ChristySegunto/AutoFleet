@@ -23,12 +23,12 @@ function Maintenance() {
       <div className='header-maintenance'>
         <div className='header-row'>
           <h1>MAINTENANCE</h1>
-          <p>Welcome Back, {adminDetails.fname}</p>
+          <p>Welcome Back, {adminDetails?.fname}</p>
         </div>
         <div className='header-button'>
           <Button className='user-button'>
             <div className='user-icon'><FaUser /></div> 
-            {adminDetails.fname} {adminDetails.lname}
+            {adminDetails?.fname} {adminDetails?.lname}
           </Button>
         </div>
       </div>

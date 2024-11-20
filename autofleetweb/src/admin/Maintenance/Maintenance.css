@@ -20,6 +20,42 @@
     margin: 0;
 }
 
+.Maintenance .header-row h1{
+    color: #ff6a18 !important;
+    margin: 0;
+    font-family: 'Poppins';
+}
+
+.Maintenance .header-row p{
+    color: #ff6a18 !important;
+    margin: 0;
+}
+
+.Maintenance .user-button {
+    height: 50px;
+    border-radius: 50px;
+    background-color: #FF6A18;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.Maintenance .user-button:hover{
+    background-color: #05202e;
+    color: #fff;
+}
+
+.Maintenance .user-icon{
+    background-color: #fff;
+    border-radius: 50%;
+    color: #FF8C4C;
+    margin-right: 10px;
+    width: 30px;
+    height: 30px;
+}
+
 .Maintenance .maintenance-title{
     margin: 0;
     border-radius: 15px;
