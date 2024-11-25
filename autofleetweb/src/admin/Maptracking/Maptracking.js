@@ -1,12 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Form, Button, Container, Row, Col, Card, Modal } from 'react-bootstrap';
-import { FaBell, FaSearch, FaUserCircle, FaPlus } from 'react-icons/fa';
+import { FaBell, FaSearch, FaUserCircle, FaPlus, FaUser } from 'react-icons/fa';
 import { database } from './firebase';
 import { ref, push, onValue } from 'firebase/database';
 import './Maptracking.css';
+import { AuthContext } from './../../settings/AuthContext.js';
 
 function Maptracking() {
+    const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
+
     const username = "User";
     const mapContainerRef = useRef(null);
     const [trips, setTrips] = useState([]);
@@ -99,24 +102,18 @@ function Maptracking() {
             {/* Header Section */}
             <Row className="align-items-center justify-content-between mb-3">
                 <Col xs="auto">
-                    <h3 className="title-text mb-0">MAP TRACKING</h3>
-                    <p className="subtitle-text">Welcome back, {username}!</p>
+                <div className="map-header">
+                    <h1>MAP TRACKING</h1>
+                    <p>Welcome Back, {adminDetails?.fname}</p>
+                </div>
                 </Col>
                 <Col xs="auto" className="d-flex align-items-center">
-                    <Button variant="link" className="icon-button">
-                        <div className="icon-circle">
-                            <FaBell size={20} />
-                        </div>
+                <div className='header-button'>
+                    <Button className='user-button'>
+                        <div className='user-icon'><FaUser /></div> 
+                        {adminDetails?.fname} {adminDetails?.lname }
                     </Button>
-                    <Button variant="link" className="icon-button">
-                        <div className="icon-circle">
-                            <FaSearch size={20} />
-                        </div>
-                    </Button>
-                    <div className="profile-section d-flex align-items-center ms-3">
-                        <FaUserCircle size={30} className="user-icon" />
-                        <span className="ms-2 user-text">{username}</span>
-                    </div>
+                </div>
                 </Col>
             </Row>
 
