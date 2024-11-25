@@ -9,6 +9,55 @@
     font-size: 1.5em;
 }
 
+.Maptracking  .map-header {
+    color: #ff6a18;
+}
+
+.Maptracking .map-header p {
+    margin: 0;
+    color: #ff6a18;
+}
+
+.Maptracking .map-header h1 {
+    margin: 0;
+    color: #ff6a18;
+}
+
+.Maptracking .header-button{
+    display: flex;
+}
+
+.Maptracking .user-button {
+    height: 50px;
+    border-radius: 50px;
+    background-color: #FF6A18;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.Maptracking .user-button:hover{
+    background-color: #05202e;
+    color: #fff;
+}
+
+.Maptracking  .user-icon{
+    background-color: #fff;
+    border-radius: 50%;
+    color: #FF8C4C;
+    margin-right: 10px;
+    width: 30px;
+    height: 30px;
+}
+
+.Maptracking .icon-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
 .main-content {
     background-color: #fffaf7; 
     padding: 20px;
@@ -89,7 +138,6 @@
 
 .map-display {
     display: flex;
-    align-items: center;
     justify-content: center;
 }
 .map-container {

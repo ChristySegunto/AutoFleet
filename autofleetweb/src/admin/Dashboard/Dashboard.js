@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { Form, Button, Alert, Modal, Container, Row, Col, Table } from 'react-bootstrap';
+import { Form, Button, Alert, Modal, Container, Row, Col, Table, Spinner } from 'react-bootstrap';
 
 import './Dashboard.css'
 
@@ -21,7 +21,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 function Dashboard() {
   const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
   const [error, setError] = useState(null); // For error handling
-
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [totalCars, setTotalCars] = useState(0);
   const [available, setAvailable] = useState(0);
   const [rented, setRented] = useState(0);
@@ -33,6 +34,9 @@ function Dashboard() {
 
   const [fname, setFname] = useState();
   const [lname, setLname] = useState();
+
+  const [recentBookings, setRecentBookings] = useState([]);
+
 
   const fleetstatusdata = {
     labels: ['SUV', 'Van', 'Sedan'],
@@ -65,8 +69,9 @@ function Dashboard() {
   // Fetch admin details based on user id
   useEffect(() => {
     const fetchAdminDetails = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:5127/api/Users/get-admin-details?userId=${user.user_id}`);
+        const response = await fetch(`http://localhost:5028/api/Dashboard/get-admin-details?userId=${user.user_id}`);
         if (response.ok) {
           const data = await response.json();
           console.log("Admin Data:", data); // Check if data is logged correctly
@@ -78,7 +83,9 @@ function Dashboard() {
         }
       } catch (error) {
         setError('Error fetching admin details: ' + error.message);
-      } 
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchAdminDetails();
@@ -90,8 +97,9 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchTotalCars = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5127/api/Vehicles/Count'); // Your API to get total cars
+        const response = await fetch('http://localhost:5028/api/Dashboard/Count'); // Your API to get total cars
         if (response.ok) {
           const data = await response.json();
           setTotalCars(data); // Set the total cars count
@@ -101,6 +109,8 @@ function Dashboard() {
         }
       } catch (error) {
         setError('Error fetching total cars: ' + error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -108,9 +118,10 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     const fetchFleetStatus = async () => {
       try {
-        const response = await fetch('http://localhost:5127/api/Vehicles/StatusCount'); // Replace with your API endpoint
+        const response = await fetch('http://localhost:5028/api/Dashboard/StatusCount'); // Replace with your API endpoint
         if (response.ok) {
           const data = await response.json();
           setAvailable(data.available);  // Assuming the response contains available count
@@ -121,6 +132,8 @@ function Dashboard() {
         }
       } catch (error) {
         setError('Error fetching fleet status: ' + error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
   
@@ -129,8 +142,9 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchCategoryCount = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5127/api/Vehicles/CategoryCount'); // Replace with your API endpoint
+        const response = await fetch('http://localhost:5028/api/Dashboard/CategoryCount'); // Replace with your API endpoint
         if (response.ok) {
           const data = await response.json();
           setSUV(data.suv);  // Assuming the response contains available count
@@ -141,12 +155,48 @@ function Dashboard() {
         }
       } catch (error) {
         setError('Error fetching fleet status: ' + error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
   
     fetchCategoryCount();
   }, []);
 
+  useEffect(() => {
+    const fetchRecentBookings = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5028/api/Dashboard/RecentBookings'); // Replace with your API endpoint
+        if (response.ok) {
+          const data = await response.json();
+          setRecentBookings(data); // Store the fetched data in state
+        } else {
+          setError('Failed to fetch recent bookings.');
+        }
+      } catch (error) {
+        setError('Error fetching recent bookings: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchRecentBookings();
+  }, []);
+  
+
+  if (isLoading) {
+    return (
+      <div className="Dashboard">
+        <div className="loading-container">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <p>Loading Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
   
 
 
@@ -230,7 +280,7 @@ function Dashboard() {
                     <tr className='upcoming-trips-custom-table'>
                       <td>
                         <div className='about'>
-                          <h4>Ford Transit</h4>
+                          <h4>Notif 1</h4>
                           <p>Driver: Juan Dela Cruz</p>
                         </div>
                       </td>
@@ -238,7 +288,7 @@ function Dashboard() {
                     <tr className='upcoming-trips-custom-table'>
                       <td className='td-custom'>
                         <div className='about'>
-                          <h4>Ford Transit</h4>
+                          <h4>Notif 2</h4>
                           <p>Driver: Juan Dela Cruz</p>
                         </div>
                       </td>
@@ -246,7 +296,7 @@ function Dashboard() {
                     <tr className='upcoming-trips-custom-table'>
                       <td>
                         <div className='about'>
-                          <h4>Ford Transit</h4>
+                          <h4>Notif 3</h4>
                           <p>Driver: Juan Dela Cruz</p>
                         </div>
                       </td>
@@ -271,27 +321,41 @@ function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>1234</td>
-                    <td>Juan Dela Cruz</td>
-                    <td>2024-11-10</td>
-                    <td>2024-11-15</td>
-                    <td className='text-center'>ON GOING</td>
-                  </tr>
-                  <tr>
-                    <td>5678</td>
-                    <td>Maria Santos</td>
-                    <td>2024-11-12</td>
-                    <td>2024-11-18</td>
-                    <td className='text-center'>COMPLETED</td>
-                  </tr>
-                  <tr>
-                    <td>9101</td>
-                    <td>Pedro Ramirez</td>
-                    <td>2024-11-14</td>
-                    <td>2024-11-20</td>
-                    <td className='text-center'>PENDING</td>
-                  </tr>
+                  {recentBookings.length > 0 ? (
+                    recentBookings.slice(0, 10).map((booking) => {  // Slice the array to show only the first 10 bookings
+                      // Determine rent_status color based on its value
+                      let rentStatusColor = '';
+                      switch (booking.rent_status) {
+                        case 'upcoming':
+                          rentStatusColor = 'upcoming'; // Blue
+                          break;
+                        case 'completed':
+                          rentStatusColor = 'completed'; // Green
+                          break;
+                        case 'canceled':
+                          rentStatusColor = 'canceled'; // Red
+                          break;
+                        default:
+                          rentStatusColor = ''; // In case of any other status
+                      }
+
+                      return (
+                        <tr key={booking.vehicle_id}>
+                          <td>{booking.vehicle_id}</td>
+                          <td>{booking.renter_fname}</td>
+                          <td>{new Date(booking.pickup_date).toLocaleDateString()}</td>
+                          <td>{new Date(booking.dropoff_date).toLocaleDateString()}</td>
+                          <td className={`text-center ${rentStatusColor}`}>
+                            {booking.rent_status.toUpperCase()} {/* Display rent_status in uppercase */}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center">No recent bookings available.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

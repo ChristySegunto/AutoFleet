@@ -391,3 +391,19 @@
     line-height: normal;
 }
 
+
+
+.recent-bookings .upcoming {
+    color: #094985 !important;
+    text-transform: uppercase;
+}
+
+.recent-bookings .completed {
+    color: green !important;
+    text-transform: uppercase;
+}
+
+.recent-bookings .canceled {
+    color: red !important;
+    text-transform: uppercase;
+}

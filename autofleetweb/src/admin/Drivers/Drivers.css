@@ -1,6 +1,6 @@
 .drivers-container {
     min-height: 100vh;
-    background-color: #f9fafb;
+    background-color: #fffaf7;
     width: 100%;
   }
 
@@ -10,15 +10,16 @@
   
   .drivers-container .vehicle-header p {
     margin: 0;
+    color: #ff6a18;
   }
   
   .drivers-container .vehicle-header h1 {
     margin: 0;
+    color: #ff6a18;
   }
   
   /* Header Styles */
   .header {
-    background-color: white;
     border-bottom: 1px solid #FFFAF7;
     padding: 1.5rem 2rem;
     width: 100%;
@@ -49,8 +50,36 @@
     align-items: center;
     gap: 10px;
     }
+    .drivers-container .header-button{
+      display: flex;
+    }
 
-    .icon-container {
+    .drivers-container .user-button {
+        height: 50px;
+        border-radius: 50px;
+        background-color: #FF6A18;
+        border: none;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .drivers-container .user-button:hover{
+        background-color: #05202e;
+        color: #fff;
+    }
+    
+    .drivers-container  .user-icon{
+        background-color: #fff;
+        border-radius: 50%;
+        color: #FF8C4C;
+        margin-right: 10px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .drivers-container .icon-container {
         display: flex;
         gap: 10px;
         align-items: center;
@@ -193,6 +222,7 @@
   .driver-card:hover {
     transform: translateX(4px);
     background-color: #184B87;
+    color: white;
   }
   
   .driver-card.selected {
