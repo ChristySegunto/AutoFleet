@@ -3,7 +3,9 @@ import { Form, Button, Alert, Modal, Container } from 'react-bootstrap';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Drivers.css';
 import { AuthContext } from './../../settings/AuthContext.js';
+import { FaBell, FaSearch, FaUser } from 'react-icons/fa';
 
+import nationalid from './../../img/national-id-1.jpg'
 
 const Drivers = () => {
   const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
@@ -73,7 +75,7 @@ const Drivers = () => {
       dropoffDate: '11/09/2024',
       dropoffTime: '11:00AM',
       photos: [
-        '/api/placeholder/400/300'
+        nationalid
       ]
     },
     {
@@ -92,7 +94,7 @@ const Drivers = () => {
       dropoffDate: '11/09/2024',
       dropoffTime: '11:00AM',
       photos: [
-        '/api/placeholder/400/300'
+        nationalid
       ]
     },
     {
@@ -111,7 +113,7 @@ const Drivers = () => {
       dropoffDate: '11/09/2024',
       dropoffTime: '11:00AM',
       photos: [
-        '/api/placeholder/400/300'
+        nationalid
       ]
     },
   ];
@@ -131,25 +133,11 @@ const Drivers = () => {
             <p>Welcome Back, {adminDetails?.fname}</p>
           </div>
           <div className="header-actions">
-            <div className="icon-container">
-              <div className="notification-container">
-                <i className="fas fa-bell notification-icon"></i>
-              </div>
-              <div className="search2-container">
-                <i className="fas fa-search search2-icon"></i>
-              </div>
-            </div>
-            <div className="admin-dropdown">
-              <img 
-                className="admin-avatar" 
-                src="/api/placeholder/30/30" 
-                alt="Avatar" 
-              />
-              <div className="admin-info">
-                <span className="admin-name">John Dalisay</span>
-                <span className="admin-label">Admin</span>
-              </div>
-              <span className="dropdown-arrow">▼</span>
+            <div className='header-button'>
+              <Button className='user-button'>
+                <div className='user-icon'><FaUser /></div> 
+                {adminDetails?.fname} {adminDetails?.lname }
+              </Button>
             </div>
           </div>
         </div>
@@ -164,7 +152,7 @@ const Drivers = () => {
               <i className="fas fa-search search-icon"></i>
               <input
                 type="text"
-                placeholder="Search Files"
+                placeholder=" Search Files"
                 className="search-input"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
