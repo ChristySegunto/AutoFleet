@@ -16,7 +16,7 @@ const Vehicles = () => {
 
   // Fetch vehicles data from the backend (replace with your actual API URL)
   useEffect(() => {
-    axios.get('https://localhost:7164/api/Vehicle/list') // Adjust the URL as needed
+    axios.get('http://localhost:5028/api/Vehicle/list') // Adjust the URL as needed
       .then(response => {
         setVehicles(response.data);
       })
@@ -66,11 +66,11 @@ const Vehicles = () => {
     setShowModal(true);
     setActiveTab('details');
   };
-
+  
   const handleRemove = (vehicle) => {
     console.log("Remove vehicle", vehicle);
-    // Add the logic to remove vehicle (call an API)
-    axios.delete(`https://localhost:7164/api/Vehicles/delete/${vehicle.vehicle_id}`)
+    // Update URL to match the backend route
+    axios.delete(`http://localhost:5028/api/Vehicle/deleteVehicle/${vehicle.vehicle_id}`)
       .then(response => {
         alert("Vehicle removed successfully!");
         setVehicles(prevList => prevList.filter(v => v.vehicle_id !== vehicle.vehicle_id));
@@ -118,12 +118,25 @@ const Vehicles = () => {
   
     console.log("New Vehicle Data:", newVehicle);
   
-    axios
-      .post("https://localhost:7164/api/Vehicle/addOrUpdate", newVehicle)
+    const request = selectedVehicle.vehicle_id
+      ? axios.put(`http://localhost:5028/api/Vehicle/${selectedVehicle.vehicle_id}`, newVehicle) // Update
+      : axios.post("http://localhost:5028/api/Vehicle/add", newVehicle); // Add
+  
+    request
       .then((response) => {
         alert("Vehicle saved successfully!");
         setShowModal(false);
-        setVehicles((prevList) => [...prevList, response.data]);
+        setVehicles((prevList) => {
+          if (selectedVehicle.vehicle_id) {
+            // Update existing vehicle
+            return prevList.map(v => 
+              v.vehicle_id === selectedVehicle.vehicle_id ? response.data : v
+            );
+          } else {
+            // Add new vehicle
+            return [...prevList, response.data];
+          }
+        });
       })
       .catch((error) => {
         console.error("Error saving vehicle:", error);
