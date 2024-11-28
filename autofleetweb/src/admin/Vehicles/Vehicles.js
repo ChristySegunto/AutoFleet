@@ -1,19 +1,47 @@
-// src/admin/Vehicles/Vehicles.js
-import { Form, Button, Modal, Row, Col, Tabs, Tab } from 'react-bootstrap';
+import { Form, Button, Modal, Row, Col, Tabs, Tab, Alert } from 'react-bootstrap';
 import { FaBell, FaSearch, FaUser, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
+import axios from 'axios';  // To make HTTP requests
 import { AuthContext } from './../../settings/AuthContext.js';
 import './Vehicles.css';
 
 const Vehicles = () => {
   const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
+  const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add', 'view', 'edit'
   const [activeTab, setActiveTab] = useState('details');
+  const [errors, setErrors] = useState({});
+
+  // Fetch vehicles data from the backend (replace with your actual API URL)
+  useEffect(() => {
+    axios.get('https://localhost:7164/api/Vehicle/list') // Adjust the URL as needed
+      .then(response => {
+        setVehicles(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching vehicles:", error);
+      });
+  }, []);
 
   const handleShow = () => {
     setModalMode('add');
+    setSelectedVehicle({
+      vehicle_id: 0,
+      plate_number: '',
+      car_model: '',
+      vehicle_status: '',
+      fuel_type: '',
+      transmission_type: '',
+      seating_capacity: '',
+      total_mileage: '',
+      vehicle_category: '',
+      total_fuel_consumption: '',
+      distance_traveled: '',
+      created_at: '',
+      updated_at: ''
+    });
     setShowModal(true);
     setActiveTab('details');
   };
@@ -22,6 +50,7 @@ const Vehicles = () => {
     setShowModal(false);
     setSelectedVehicle(null);
     setActiveTab('details');
+    setErrors({});  // Clear errors on modal close
   };
 
   const handleRowClick = (vehicle) => {
@@ -40,90 +69,68 @@ const Vehicles = () => {
 
   const handleRemove = (vehicle) => {
     console.log("Remove vehicle", vehicle);
+    // Add the logic to remove vehicle (call an API)
+    axios.delete(`https://localhost:7164/api/Vehicles/delete/${vehicle.vehicle_id}`)
+      .then(response => {
+        alert("Vehicle removed successfully!");
+        setVehicles(prevList => prevList.filter(v => v.vehicle_id !== vehicle.vehicle_id));
+      })
+      .catch(error => {
+        console.error("Error removing vehicle:", error);
+        alert(`Failed to remove vehicle: ${error.response?.data || error.message}`);
+      });
   };
 
-  const handleView = (vehicle) => {
-    setSelectedVehicle(vehicle);
-    setModalMode('view');
-    setShowModal(true);
-    setActiveTab('details');
+  const validateForm = () => {
+    const newErrors = {};
+    if (!selectedVehicle?.plate_number) newErrors.plate_number = "Plate number is required.";
+    if (!selectedVehicle?.car_model) newErrors.car_model = "Car model is required.";
+    if (!selectedVehicle?.vehicle_status) newErrors.vehicle_status = "Vehicle status is required.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
-  // sample data, icoconnect ito sa db
-  const vehicles = [
-    {
-      vehicle_id: '1',
-      plate_number: 'ABC-1234',
-      driver: 'Juan Dela Cruz',
-      car_model: 'Toyota Hiace',
-      vehicle_status: 'Repair',
-      image: '/path/to/driver-image.jpg',
-      performanceNotes:
-        'The vehicle has been performing well, with no reported issues. Regular check-ups are recommended to maintain efficiency',
-      utilization:
-        'Actively utilized for local deliveries, averaging 500 km/week.',
-      car_manufacturer: 'Toyota',
-      manufacture_year: '2020',
-      vehicle_color: 'White',
-      fuel_type: 'Diesel',
-      transmission_type: 'Automatic',
-      seating_capacity: '12',
-      total_mileage: '85,000 km',
-      total_fuel_consumption: '2,500 L',
-      distance_traveled: '12,500 km',
-      vehicle_category: 'Van',
-      created_at: '2023-01-15T08:30:00Z',
-      updated_at: '2024-03-20T14:45:00Z'
-    },
-    {
-      vehicle_id: '2',
-      plate_number: 'DEF-5678',
-      driver: 'Maria Santos',
-      car_model: 'Ford Transit',
-      vehicle_status: 'Active',
-      image: '/path/to/driver-image2.jpg',
-      performanceNotes:
-        'Excellent condition, minimal maintenance required',
-      utilization:
-        'Used for long-distance transportation, averaging 750 km/week.',
-      car_manufacturer: 'Ford',
-      manufacture_year: '2019',
-      vehicle_color: 'Blue',
-      fuel_type: 'Gasoline',
-      transmission_type: 'Manual',
-      seating_capacity: '15',
-      total_mileage: '95,000 km',
-      total_fuel_consumption: '3,200 L',
-      distance_traveled: '15,800 km',
-      vehicle_category: 'Passenger Van',
-      created_at: '2023-02-20T10:15:00Z',
-      updated_at: '2024-03-19T16:30:00Z'
-    },
-    {
-      vehicle_id: '3',
-      plate_number: 'GHI-9012',
-      driver: 'Pedro Lopez',
-      car_model: 'Nissan NV350',
-      vehicle_status: 'Inactive',
-      image: '/path/to/driver-image3.jpg',
-      performanceNotes:
-        'Requires significant maintenance, currently out of service',
-      utilization:
-        'Not in active use, awaiting repairs',
-      car_manufacturer: 'Nissan',
-      manufacture_year: '2018',
-      vehicle_color: 'Silver',
-      fuel_type: 'Diesel',
-      transmission_type: 'Automatic',
-      seating_capacity: '10',
-      total_mileage: '110,000 km',
-      total_fuel_consumption: '2,800 L',
-      distance_traveled: '13,200 km',
-      vehicle_category: 'Cargo Van',
-      created_at: '2023-03-10T09:45:00Z',
-      updated_at: '2024-03-18T11:20:00Z'
-    },
-  ];
 
+  const handleSave = () => {
+    if (!validateForm()) return;
+  
+    const newVehicle = {
+      plate_number: selectedVehicle.plate_number,
+      car_manufacturer: selectedVehicle.car_manufacturer,
+      car_model: selectedVehicle.car_model,
+      manufacture_year: selectedVehicle.manufacture_year,
+      vehicle_color: selectedVehicle.vehicle_color,
+      fuel_type: selectedVehicle.fuel_type,
+      transmission_type: selectedVehicle.transmission_type,
+      seating_capacity: selectedVehicle.seating_capacity,
+      vehicle_category: selectedVehicle.vehicle_category,
+      total_mileage: selectedVehicle.total_mileage,
+      total_fuel_consumption: selectedVehicle.total_fuel_consumption,
+      distance_traveled: selectedVehicle.distance_traveled,
+      vehicle_status: selectedVehicle.vehicle_status,
+      created_at: selectedVehicle.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  
+    // Include vehicle_id only for updates
+    if (selectedVehicle.vehicle_id) {
+      newVehicle.vehicle_id = selectedVehicle.vehicle_id;
+    }
+  
+    console.log("New Vehicle Data:", newVehicle);
+  
+    axios
+      .post("https://localhost:7164/api/Vehicle/addOrUpdate", newVehicle)
+      .then((response) => {
+        alert("Vehicle saved successfully!");
+        setShowModal(false);
+        setVehicles((prevList) => [...prevList, response.data]);
+      })
+      .catch((error) => {
+        console.error("Error saving vehicle:", error);
+        alert(`Failed to save vehicle: ${error.response?.data || error.message}`);
+      });
+  };
+  
   return (
     <div className="vehicles-container">
       <div className="top-ribbon">
@@ -135,7 +142,7 @@ const Vehicles = () => {
         </div>
         <div className='header-button'>
           <Button className='user-button'>
-            <div className='user-icon'><FaUser /></div> 
+            <div className='user-icon'><FaUser /></div>
             {adminDetails?.fname} {adminDetails?.lname}
           </Button>
         </div>
@@ -157,7 +164,6 @@ const Vehicles = () => {
             <tr>
               <th>Vehicle ID</th>
               <th>Plate Number</th>
-              <th>Driver</th>
               <th>Car Model</th>
               <th>Status</th>
               <th>Action</th>
@@ -172,7 +178,6 @@ const Vehicles = () => {
               >
                 <td>{vehicle.vehicle_id}</td>
                 <td>{vehicle.plate_number}</td>
-                <td>{vehicle.driver}</td>
                 <td>{vehicle.car_model}</td>
                 <td>
                   <span className={`status ${vehicle.vehicle_status.toLowerCase()}`}>
@@ -194,7 +199,7 @@ const Vehicles = () => {
                   </Button>
                   <Button className="action-btn" onClick={(e) => {
                     e.stopPropagation();
-                    handleView(vehicle);
+                    handleRowClick(vehicle); // This will open the vehicle details in view mode
                   }}>
                     <FaEye />
                   </Button>
@@ -205,6 +210,7 @@ const Vehicles = () => {
         </table>
       </div>
 
+      {/* Modal for add/edit/view vehicle */}
       <Modal className='modal-vehicle' show={showModal} onHide={handleClose} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title className='modal-vehicle-title'>
@@ -216,166 +222,141 @@ const Vehicles = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Tabs 
+        <Tabs 
             activeKey={activeTab} 
             onSelect={(k) => setActiveTab(k)} 
             className="mb-3"
           >
             <Tab eventKey="details" title="Details">
               <div className="vehicle-details-view">
-                {/* Profile section only shown in view mode */}
+                {/* Check if selectedVehicle exists before rendering */}
                 {modalMode === 'view' && selectedVehicle && (
                   <>
                     <div className="profile-section">
-                      <img 
-                        src={selectedVehicle.image} 
-                        alt={selectedVehicle.driver} 
-                        className="driver-image" 
-                      />
                       <div className="vehicle-info">
                         <div className="registration-number">
                           REGISTRATION NUMBER: {selectedVehicle.plate_number}
                         </div>
-                        <h2 className="driver-name">{selectedVehicle.driver}</h2>
                         <h3 className="vehicle-model">{selectedVehicle.car_model}</h3>
                       </div>
-                      
+
                       <span className={`status ${selectedVehicle.vehicle_status.toLowerCase()}`}>
                         {selectedVehicle.vehicle_status}
                       </span>
                     </div>
-
-                    <hr />
-
-                    <div className="remarks">
-                      <h4>REMARKS</h4>
-                      <p>
-                        <strong>Performance Notes: </strong>
-                        {selectedVehicle.performanceNotes}
-                      </p>
-                      <p>
-                        <strong>Fleet Utilization: </strong>
-                        {selectedVehicle.utilization}
-                      </p>
-                    </div>
-
                     <hr />
                   </>
                 )}
 
-                {/* Form fields shown in all modes */}
                 <Form>
                   {(modalMode === 'add' || modalMode === 'edit') && (
                     <>
                       <Row md={2}>
-                        <Form.Group className='modal-vehicle-formgroup' controlId="driverName">
-                          <Form.Label className='modal-vehicle-label'>Driver Name</Form.Label>
+                        <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="plateNumber">
+                          <Form.Label className="modal-vehicle-label">Plate Number</Form.Label>
                           <Form.Control 
-                            className='modal-vehicle-control' 
+                            className="modal-vehicle-control" 
                             type="text" 
-                            placeholder="Enter Driver Name"
-                            defaultValue={selectedVehicle?.driver || ''}
+                            placeholder="Enter Plate Number"
+                            value={selectedVehicle?.plate_number || ''}
+                            onChange={(e) => setSelectedVehicle({ ...selectedVehicle, plate_number: e.target.value })}
+                            disabled={modalMode === 'view'}
                           />
                         </Form.Group>
 
-                        <Form.Group className='modal-vehicle-formgroup' controlId="vehicleStatus">
-                          <Form.Label className='modal-vehicle-label'>Vehicle Status</Form.Label>
+                        <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="carModel">
+                          <Form.Label className="modal-vehicle-label">Car Model</Form.Label>
+                          <Form.Control 
+                            className="modal-vehicle-control" 
+                            type="text" 
+                            placeholder="Enter Car Model"
+                            value={selectedVehicle?.car_model || ''}                          
+                            onChange={(e) => setSelectedVehicle({ ...selectedVehicle, car_model: e.target.value })}
+                            disabled={modalMode === 'view'}
+                          />
+                        </Form.Group>
+
+                        <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="vehicleStatus">
+                          <Form.Label className="modal-vehicle-label">Vehicle Status</Form.Label>
                           <Form.Select 
-                            className='modal-vehicle-control'
-                            defaultValue={selectedVehicle?.vehicle_status || ''}
+                            className="modal-vehicle-control"
+                            value={selectedVehicle?.vehicle_status || ''}
+                            onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_status: e.target.value })}
+                            disabled={modalMode === 'view'}
                           >
                             <option value="">Select Status</option>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Repair">Repair</option>
+                            <option value="Available">Active</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Rented">Rented</option>
+                            <option value="On Maintenance">Maintenance</option>
                           </Form.Select>
                         </Form.Group>
                       </Row>
-
-                      <Row md={1}>
-                        <Form.Group className='modal-vehicle-formgroup' controlId="performanceNotes">
-                          <Form.Label className='modal-vehicle-label'>Performance Notes</Form.Label>
-                          <Form.Control 
-                            as="textarea" 
-                            rows={3}
-                            className='modal-vehicle-control' 
-                            placeholder="Enter Performance Notes"
-                            defaultValue={selectedVehicle?.performanceNotes || ''}
-                          />
-                        </Form.Group>
-
-                        <Form.Group className='modal-vehicle-formgroup' controlId="utilization">
-                          <Form.Label className='modal-vehicle-label'>Fleet Utilization</Form.Label>
-                          <Form.Control 
-                            as="textarea" 
-                            rows={3}
-                            className='modal-vehicle-control' 
-                            placeholder="Enter Fleet Utilization"
-                            defaultValue={selectedVehicle?.utilization || ''}
-                          />
-                        </Form.Group>
-                      </Row>
-
                       <hr />
                     </>
                   )}
 
                   <Col>
-                    <Modal.Title className='modal-vehicle-title'>VEHICLE SPECS</Modal.Title>
+                    <Modal.Title className="modal-vehicle-title">VEHICLE SPECS</Modal.Title>
                     <Row md={3}>
-                      <Form.Group className='modal-vehicle-formgroup' controlId="vehicleFuel">
-                        <Form.Label className='modal-vehicle-label'>Fuel Type</Form.Label>
+                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleFuel">
+                        <Form.Label className="modal-vehicle-label">Fuel Type</Form.Label>
                         <Form.Control 
-                          className='modal-vehicle-control' 
+                          className="modal-vehicle-control" 
                           type="text" 
-                          placeholder="Enter Fuel Type" 
-                          defaultValue={selectedVehicle?.fuel_type || ''}
+                          placeholder="Enter Fuel Type"
+                          value={selectedVehicle?.fuel_type || ''}
+                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, fuel_type: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
                       </Form.Group>
 
-                      <Form.Group className='modal-vehicle-formgroup' controlId="vehicleTransmission">
-                        <Form.Label className='modal-vehicle-label'>Transmission Type</Form.Label>
+                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleTransmission">
+                        <Form.Label className="modal-vehicle-label">Transmission Type</Form.Label>
                         <Form.Control 
-                          className='modal-vehicle-control' 
+                          className="modal-vehicle-control" 
                           type="text" 
-                          placeholder="Enter Transmission Type" 
-                          defaultValue={selectedVehicle?.transmission_type || ''}
+                          placeholder="Enter Transmission Type"
+                          value={selectedVehicle?.transmission_type || ''}
+                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, transmission_type: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
                       </Form.Group>
 
-                      <Form.Group className='modal-vehicle-formgroup' controlId="vehicleCapacity">
-                        <Form.Label className='modal-vehicle-label'>Seating Capacity</Form.Label>
+                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCapacity">
+                        <Form.Label className="modal-vehicle-label">Seating Capacity</Form.Label>
                         <Form.Control 
-                          className='modal-vehicle-control' 
+                          className="modal-vehicle-control" 
                           type="text" 
-                          placeholder="Enter Seating Capacity" 
-                          defaultValue={selectedVehicle?.seating_capacity || ''}
+                          placeholder="Enter Seating Capacity"
+                          value={selectedVehicle?.seating_capacity || ''}
+                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, seating_capacity: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
                       </Form.Group>
                     </Row>
 
                     <Row md={2}>
-                      <Form.Group className='modal-vehicle-formgroup' controlId="vehicleMileage">
-                        <Form.Label className='modal-vehicle-label'>Vehicle Mileage</Form.Label>
+                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleMileage">
+                        <Form.Label className="modal-vehicle-label">Vehicle Mileage</Form.Label>
                         <Form.Control 
-                          className='modal-vehicle-control' 
+                          className="modal-vehicle-control" 
                           type="text" 
                           placeholder="Enter Mileage"
-                          defaultValue={selectedVehicle?.total_mileage || ''}
+                          value={selectedVehicle?.total_mileage || ''}
+                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, total_mileage: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
                       </Form.Group>
 
-                      <Form.Group className='modal-vehicle-formgroup' controlId="vehicleCategory">
-                        <Form.Label className='modal-vehicle-label'>Vehicle Category</Form.Label>
+                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCategory">
+                        <Form.Label className="modal-vehicle-label">Vehicle Category</Form.Label>
                         <Form.Control 
-                          className='modal-vehicle-control' 
+                          className="modal-vehicle-control" 
                           type="text" 
                           placeholder="Enter Category"
-                          defaultValue={selectedVehicle?.vehicle_category || ''}
+                          value={selectedVehicle?.vehicle_category || ''}
+                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_category: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
                       </Form.Group>
@@ -389,21 +370,22 @@ const Vehicles = () => {
               <Form>
                 <Col>
                   <Row md={3}>
-                    <Form.Group className='modal-vehicle-formgroup' controlId="vehicleManufacturer">
-                      <Form.Label className='modal-vehicle-label'>Manufacturer</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleManufacturer">
+                      <Form.Label className="modal-vehicle-label">Manufacturer</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
-                        placeholder="Enter Manufacturer" 
-                        defaultValue={selectedVehicle?.car_manufacturer || ''}
+                        placeholder="Enter Manufacturer"
+                        value={selectedVehicle?.car_manufacturer || ''}  // Use 'value' here
                         disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, car_manufacturer: e.target.value })} // Ensure onChange updates state
                       />
                     </Form.Group>
 
-                    <Form.Group className='modal-vehicle-formgroup' controlId="vehicleModel">
-                      <Form.Label className='modal-vehicle-label'>Model</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleModel">
+                      <Form.Label className="modal-vehicle-label">Model</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
                         placeholder="Enter Model" 
                         defaultValue={selectedVehicle?.car_model || ''}
@@ -411,10 +393,10 @@ const Vehicles = () => {
                       />
                     </Form.Group>
 
-                    <Form.Group className='modal-vehicle-formgroup' controlId="vehiclePlate">
-                      <Form.Label className='modal-vehicle-label'>Plate Number</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="vehiclePlate">
+                      <Form.Label className="modal-vehicle-label">Plate Number</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
                         placeholder="Enter Plate Number" 
                         defaultValue={selectedVehicle?.plate_number || ''}
@@ -424,25 +406,27 @@ const Vehicles = () => {
                   </Row>
 
                   <Row md={2}>
-                    <Form.Group className='modal-vehicle-formgroup' controlId="vehicleBirthyear">
-                      <Form.Label className='modal-vehicle-label'>Year of Manufacture</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleBirthyear">
+                      <Form.Label className="modal-vehicle-label">Year of Manufacture</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
                         placeholder="Enter Year of Manufacture"
-                        defaultValue={selectedVehicle?.manufacture_year || ''}
+                        value={selectedVehicle?.manufacture_year || ''}  // Use 'value' here instead of 'defaultValue'
                         disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, manufacture_year: e.target.value })} // Ensure onChange updates state
                       />
                     </Form.Group>
 
-                    <Form.Group className='modal-vehicle-formgroup' controlId="vehicleColor">
-                      <Form.Label className='modal-vehicle-label'>Vehicle Color</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleColor">
+                      <Form.Label className="modal-vehicle-label">Vehicle Color</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
                         placeholder="Enter Color"
-                        defaultValue={selectedVehicle?.vehicle_color || ''}
+                        value={selectedVehicle?.vehicle_color || ''}  // Use 'value' here
                         disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_color: e.target.value })} // Ensure onChange updates state
                       />
                     </Form.Group>
                   </Row>
@@ -454,10 +438,10 @@ const Vehicles = () => {
               <Form>
                 <Col>
                   <Row md={3}>
-                    <Form.Group className='modal-vehicle-formgroup' controlId="vehicleFuel">
-                      <Form.Label className='modal-vehicle-label'>Fuel Type</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleFuel">
+                      <Form.Label className="modal-vehicle-label">Fuel Type</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
                         placeholder="Enter Fuel Type" 
                         defaultValue={selectedVehicle?.fuel_type || ''}
@@ -465,47 +449,51 @@ const Vehicles = () => {
                       />
                     </Form.Group>
 
-                    <Form.Group className='modal-vehicle-formgroup' controlId="totalFuelConsumption">
-                      <Form.Label className='modal-vehicle-label'>Total Fuel Consumption</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="totalFuelConsumption">
+                      <Form.Label className="modal-vehicle-label">Total Fuel Consumption</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
                         placeholder="Enter Total Fuel Consumption" 
-                        defaultValue={selectedVehicle?.total_fuel_consumption || ''}
+                        value={selectedVehicle?.total_fuel_consumption || ''}  // Use 'value' here
                         disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, total_fuel_consumption: e.target.value })} // Ensure onChange updates state
                       />
                     </Form.Group>
 
-                    <Form.Group className='modal-vehicle-formgroup' controlId="distanceTraveled">
-                      <Form.Label className='modal-vehicle-label'>Distance Traveled</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="distanceTraveled">
+                      <Form.Label className="modal-vehicle-label">Distance Traveled</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="text" 
                         placeholder="Enter Distance Traveled" 
-                        defaultValue={selectedVehicle?.distance_traveled || ''}
+                        value={selectedVehicle?.distance_traveled || ''}  // Use 'value' here
                         disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, distance_traveled: e.target.value })} // Ensure onChange updates state
                       />
                     </Form.Group>
                   </Row>
 
                   <Row md={2}>
-                    <Form.Group className='modal-vehicle-formgroup' controlId="createdAt">
-                      <Form.Label className='modal-vehicle-label'>Created At</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="createdAt">
+                      <Form.Label className="modal-vehicle-label">Created At</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="datetime-local" 
-                        defaultValue={selectedVehicle?.created_at ? new Date(selectedVehicle.created_at).toISOString().slice(0, 16) : ''}
+                        value={selectedVehicle?.created_at ? new Date(selectedVehicle.created_at).toISOString().slice(0, 16) : ''} // Use 'value' here
                         disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, created_at: e.target.value })} // Ensure onChange updates state
                       />
                     </Form.Group>
 
-                    <Form.Group className='modal-vehicle-formgroup' controlId="updatedAt">
-                      <Form.Label className='modal-vehicle-label'>Updated At</Form.Label>
+                    <Form.Group className="modal-vehicle-formgroup" controlId="updatedAt">
+                      <Form.Label className="modal-vehicle-label">Updated At</Form.Label>
                       <Form.Control 
-                        className='modal-vehicle-control' 
+                        className="modal-vehicle-control" 
                         type="datetime-local" 
-                        defaultValue={selectedVehicle?.updated_at ? new Date(selectedVehicle.updated_at).toISOString().slice(0, 16) : ''}
+                        value={selectedVehicle?.updated_at ? new Date(selectedVehicle.updated_at).toISOString().slice(0, 16) : ''} // Use 'value' here
                         disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, updated_at: e.target.value })} // Ensure onChange updates state
                       />
                     </Form.Group>
                   </Row>
@@ -514,14 +502,14 @@ const Vehicles = () => {
             </Tab>
           </Tabs>
         </Modal.Body>
-        
+
         <Modal.Footer>
-          <Button variant="secondary" className='modal-vehicle-close' onClick={handleClose}>
+          <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          {modalMode !== 'view' && (
-            <Button className='modal-vehicle-save' onClick={handleClose}>
-              Save Changes
+          {(modalMode === 'add' || modalMode === 'edit') && (
+            <Button variant="primary" onClick={handleSave}>
+              Save
             </Button>
           )}
         </Modal.Footer>
