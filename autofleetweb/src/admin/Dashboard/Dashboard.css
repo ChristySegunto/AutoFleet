@@ -20,19 +20,19 @@
     margin: 0;
 }
 
-.header-row h1{
-    color: #FF8C4C !important;
+.Dashboard .header-row h1{
+    color: #ff6a18 !important;
     margin: 0;
     font-family: 'Poppins';
 }
 
 
-.header-row p{
-    color: #FF8C4C !important;
+.Dashboard .header-row p{
+    color: #ff6a18 !important;
     margin: 0;
 }
 
-.notif-button {
+.Dashboard .notif-button {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -46,12 +46,12 @@
     margin-right: 10px;
 }
 
-.notif-button:hover{
+.Dashboard .notif-button:hover{
     background-color: #05202e;
     color: #fff;
 }
 
-.search-button {
+.Dashboard .search-button {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -65,12 +65,12 @@
     margin-right: 10px;
 }
 
-.search-button:hover{
+.Dashboard .search-button:hover{
     background-color: #05202e;
     color: #fff;
 }
 
-.user-button {
+.Dashboard .user-button {
     height: 50px;
     border-radius: 50px;
     background-color: #FF6A18;
@@ -81,12 +81,12 @@
     justify-content: center;
 }
 
-.user-button:hover{
+.Dashboard .user-button:hover{
     background-color: #05202e;
     color: #fff;
 }
 
-.user-icon{
+.Dashboard .user-icon{
     background-color: #fff;
     border-radius: 50%;
     color: #FF8C4C;
@@ -95,26 +95,26 @@
     height: 30px;
 }
 
-.dashboard-content{
+.Dashboard .dashboard-content{
     margin-top: 20px;
 }
 
-.left-content{
+.Dashboard .left-content{
     padding: 0;
 }
 
-.right-content{
+.Dashboard .right-content{
     padding: 0;
 }
 
-.dashboard-total{
+.Dashboard .dashboard-total{
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     padding-right: 10px;
 }
 
-.total-car{
+.Dashboard .total-car{
     flex: 1;
     background-color: #fff;
     padding: 15px;
@@ -123,7 +123,7 @@
     box-shadow: 0px 4px 40px 6px rgba(0, 0, 0, 0.02);
 }
 
-.total-car-custom {
+.Dashboard .total-car-custom {
     display: flex;
     flex-direction: column;
     height: 100%; 
@@ -132,7 +132,7 @@
   
 
 
-.total-car h4{
+.Dashboard .total-car h4{
     color: #A2A2A2;
     font-family: Poppins;
     font-size: 1.2rem;
@@ -142,7 +142,7 @@
     margin: 0;
 }
 
-.total-car p{
+.Dashboard .total-car p{
     color: #012A4A;
     font-family: Poppins;
     font-size: 4rem;
@@ -151,7 +151,7 @@
     margin: 0;
 }
 
-.dashboard-crashreport{
+.Dashboard .dashboard-crashreport{
     background-color: #fff;
     margin: 0;
     padding: 10px;
@@ -160,7 +160,7 @@
     box-shadow: 0px 4px 40px 6px rgba(0, 0, 0, 0.02);
 }
 
-.dashboard-crashreport h4{
+.Dashboard .dashboard-crashreport h4{
     color: #A2A2A2;
     font-family: Poppins;
     font-size: 1.1rem;
@@ -170,13 +170,13 @@
     margin: 0;
 }
 
-.time{
+.Dashboard .time{
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.time h4{
+.Dashboard .time h4{
     color: #A2A2A2;
     text-align: center;
     font-family: Poppins;
@@ -186,7 +186,7 @@
     line-height: normal;
 }
 
-.time p{
+.Dashboard .time p{
     margin: 0;
     color: #A2A2A2;
     text-align: center;
@@ -197,13 +197,13 @@
     line-height: normal;
 }
 
-.driver{
+.Dashboard .driver{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 
-.driver h4{
+.Dashboard .driver h4{
     color: #A2A2A2;
     text-align: center;
     font-family: Poppins;
@@ -213,7 +213,7 @@
     line-height: normal;
 }
 
-.driver p{
+.Dashboard .driver p{
     margin: 0;
     color: #A2A2A2;
     text-align: center;
@@ -224,19 +224,19 @@
     line-height: normal;
 }
 
-.open-btn{
+.Dashboard .open-btn{
     display: flex;
     justify-content: center;
 }
 
-.open-btn-custom{
+.Dashboard .open-btn-custom{
     border-radius: 50px;
     background: #094985;
     padding-right: 20px;
     padding-left: 20px;
 }
 
-.fleet-status{
+.Dashboard .fleet-status{
     background-color: #fff;
     margin: 0;
     border-radius: 15px;
@@ -245,7 +245,7 @@
     padding: 10px;
 }
 
-.fleet-status h4{
+.Dashboard .fleet-status h4{
     color: #A2A2A2;
     font-family: Poppins;
     font-size: 1.2rem;
@@ -255,14 +255,14 @@
     margin: 0;
 }
 
-.pie-chart-container {
+.Dashboard .pie-chart-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 200px;
 }
 
-.location-overview{
+.Dashboard .location-overview{
     background-color: #fff;
     margin: 0;
     border-radius: 15px;
@@ -272,7 +272,7 @@
     padding: 10px;
 }
 
-.location-overview h4{
+.Dashboard .location-overview h4{
     color: #A2A2A2;
     font-family: Poppins;
     font-size: 1.1rem;
@@ -281,13 +281,13 @@
     line-height: normal;
 }
 
-.location-overview-custom{
+.Dashboard .location-overview-custom{
     height: 400px;
     padding-bottom: 10px;
 }
 
 
-.upcoming-trips{
+.Dashboard .upcoming-trips{
     background-color: #fff;
     margin: 0;
     border-radius: 15px;
@@ -296,7 +296,7 @@
     padding: 10px;
 }
 
-.upcoming-trips h4{
+.Dashboard .upcoming-trips h4{
     color: #A2A2A2;
     font-family: Poppins;
     font-size: 1.2rem;
@@ -307,22 +307,22 @@
     padding-top: 10px;
 }
 
-.table tr{
+.Dashboard .table tr{
     border: transparent;
     margin-bottom: 10px !important;
 }
 
-.upcoming-trips-table{
+.Dashboard .upcoming-trips-table{
     margin-top: 20px;
     border-collapse: separate !important;
     border-spacing: 0 10px !important;
 }
 
-.upcoming-trips-custom-table tr{
+.Dashboard .upcoming-trips-custom-table tr{
     margin-bottom: 10px !important; /* Adds gap between rows */
 }
 
-.upcoming-trips-custom-table td{
+.Dashboard .upcoming-trips-custom-table td{
     background-color: #EFEFEF !important;
     border-radius: 15px;
     padding: 10px;
@@ -330,7 +330,7 @@
 
 
   
-.about h4{
+.Dashboard .about h4{
     color: #A6A6A6;
     font-family: Poppins;
     font-size: 1.3rem;
@@ -340,7 +340,7 @@
     padding: 0 !important;
 }
 
-.about p{
+.Dashboard .about p{
     color: #A6A6A6;
     font-family: Poppins;
     font-size: 1.1rem;
@@ -350,7 +350,7 @@
     margin: 0;
 }
 
-.recent-bookings{
+.Dashboard .recent-bookings{
     background-color: #fff;
     margin: 0;
     border-radius: 15px;
@@ -358,7 +358,7 @@
     box-shadow: 0px 4px 40px 6px rgba(0, 0, 0, 0.02);
 }
 
-.recent-bookings h4{
+.Dashboard .recent-bookings h4{
     color: #A2A2A2;
     font-family: Poppins;
     font-size: 1.2rem;
@@ -370,12 +370,12 @@
     padding-bottom: 10px;
 }
 
-.recent-bookings-table .table thead tr{
+.Dashboard .recent-bookings-table .table thead tr{
     border: #C6C6C6 !important;
     border-width: 1px !important;
 }
 
-.recent-bookings-table .table th{
+.Dashboard .recent-bookings-table .table th{
     color: #A6A6A6;
     font-family: Poppins;
     font-style: normal;
@@ -383,7 +383,7 @@
     line-height: normal;
 }
 
-.recent-bookings-table .table td{
+.Dashboard .recent-bookings-table .table td{
     color: #A6A6A6;
     font-family: Poppins;
     font-style: normal;
@@ -391,3 +391,19 @@
     line-height: normal;
 }
 
+
+
+.recent-bookings .upcoming {
+    color: #094985 !important;
+    text-transform: uppercase;
+}
+
+.recent-bookings .completed {
+    color: green !important;
+    text-transform: uppercase;
+}
+
+.recent-bookings .canceled {
+    color: red !important;
+    text-transform: uppercase;
+}

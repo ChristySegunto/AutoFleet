@@ -22,7 +22,7 @@ const Login = () => {
         setError('');
 
         try {
-            const response = await fetch('https://localhost:7192/api/users/login', {
+            const response = await fetch('http://localhost:5028/api/login/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -109,9 +109,9 @@ const Login = () => {
                             />
                         </div>
 
-                        <div className="forgot-pass text-center">
+                        {/* <div className="forgot-pass text-center">
                             <a href="#" className="medium">Forgot Password?</a>
-                        </div>
+                        </div> */}
 
                         <div className="d-flex justify-content-center">
                             <button type="submit" className="btn btn-primary w-50 mt-5 mb-3">LOGIN</button>

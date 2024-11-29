@@ -2,71 +2,79 @@
     background-color: #012A4A;
     overflow: hidden;
 }
-
-.logo{
+.login .logo{
     width: 150px;
 }
 
 
-.logo-section{
+.login .logo-section{
     margin-right: 50px;
 }
 
-.logo-section h1{
+.login .logo-section h1{
     color: #FF5C02;
     font-family: 'League Spartan';
     margin: 0;
     padding: 0;
 }
 
-.logo-section h4{
+.login .logo-section h4{
     font-weight: 200;
     margin-top: -10px;
 }
 
-.right-side h2{
+.login .left-side {
+    background-color: transparent;
+}
+
+.login .right-side{
+    display: flex;
+    flex-direction: column;
+}
+
+.login .right-side h2{
     font-family: 'League Spartan';
     color: #FF5C02;
     font-size: 2.5rem;
     font-weight: 600;
 }
 
-.right-side .email-form label{
+.login .right-side .email-form label{
     font-weight: 300;
     font-size: 1.2rem;
 }
 
-.right-side .email-form input{
+.login .right-side .email-form input{
     background: #F4F4F4;
     border: 0;
     min-height: 50px;
     font-weight: 200;
 }
 
-.right-side .email-form input::placeholder{
+.login .right-side .email-form input::placeholder{
     font-weight: 200;
     color: #000000;
 }
 
 
-.right-side .pass-form label{
+.login .right-side .pass-form label{
     font-weight: 300;
     font-size: 1.2rem;
 }
 
-.right-side .pass-form input{
+.login .right-side .pass-form input{
     background: #F4F4F4;
     border: 0;
     min-height: 50px;
     font-weight: 200;
 }
 
-.right-side .pass-form input::placeholder{
+.login .right-side .pass-form input::placeholder{
     font-weight: 200;
     color: #000000;
 }
 
-.right-side .forgot-pass a{
+.login .right-side .forgot-pass a{
     color: #477BBE;
     font-weight: 300;
 }

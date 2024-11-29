@@ -1,13 +1,26 @@
 .drivers-container {
     min-height: 100vh;
-    background-color: #f9fafb;
+    background-color: #fffaf7;
     width: 100%;
+  }
+
+  .drivers-container  .vehicle-header {
+    color: #ff6a18;
+  }
+  
+  .drivers-container .vehicle-header p {
+    margin: 0;
+    color: #ff6a18;
+  }
+  
+  .drivers-container .vehicle-header h1 {
+    margin: 0;
+    color: #ff6a18;
   }
   
   /* Header Styles */
   .header {
-    background-color: white;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #FFFAF7;
     padding: 1.5rem 2rem;
     width: 100%;
   }
@@ -37,8 +50,36 @@
     align-items: center;
     gap: 10px;
     }
+    .drivers-container .header-button{
+      display: flex;
+    }
 
-    .icon-container {
+    .drivers-container .user-button {
+        height: 50px;
+        border-radius: 50px;
+        background-color: #FF6A18;
+        border: none;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .drivers-container .user-button:hover{
+        background-color: #05202e;
+        color: #fff;
+    }
+    
+    .drivers-container  .user-icon{
+        background-color: #fff;
+        border-radius: 50%;
+        color: #FF8C4C;
+        margin-right: 10px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .drivers-container .icon-container {
         display: flex;
         gap: 10px;
         align-items: center;
@@ -132,22 +173,22 @@
     font-size: 1.1rem;
   }
   
-  .search-icon {
+  .dsearch-icon {
     position: absolute;
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
     color: #9ca3af;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
   
-  .add-driver-container {
+  .add-schedule-container {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 1.5rem;
   }
   
-  .add-driver-btn {
+  .add-schedule-btn {
     background-color: #dbeafe;
     color: #2563eb;
     padding: 0.75rem 1.5rem;
@@ -181,6 +222,7 @@
   .driver-card:hover {
     transform: translateX(4px);
     background-color: #184B87;
+    color: white;
   }
   
   .driver-card.selected {
@@ -198,13 +240,13 @@
     font-size: 2rem;
   }
   
-  .driver-name {
+  .drivers-name {
     font-weight: 600;
     font-size: 1.2rem;
     margin-bottom: 0.25rem;
   }
   
-  .driver-reg {
+  .driver-car {
     font-size: 1rem;
     margin-bottom: 0.5rem;
   }
@@ -220,7 +262,7 @@
     background-color: rgba(0, 0, 0, 0.1);
   }
   
-  .status-available::before {
+  .status-ONGOING::before {
     content: '';
     width: 8px;
     height: 8px;
@@ -228,12 +270,12 @@
     background-color: #22c55e;
   }
   
-  .status-unavailable::before {
+  .status-COMPLETED::before {
     content: '';
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #ef4444;
+    background-color: #c40b0b;
   }
   
   /* Driver Details */
@@ -247,7 +289,7 @@
     color: white;
     padding: 2rem;
     border-radius: 0.75rem;
-    height: calc(100vh - 280px);
+    height: auto;
     overflow-y: auto;
   }
   
@@ -287,15 +329,11 @@
     gap: 1.5rem;
   }
   
-  .car-photo {
-    width: 100%;
-    transition: transform 0.2s ease;
+  .id-photo{
+    height: 200px;
+    width: 300px;
+
   }
-  
-  .car-photo:hover {
-    transform: scale(1.02);
-  }
-  
   /* Scrollbar Styling */
   .drivers-grid::-webkit-scrollbar,
   .details-card::-webkit-scrollbar {
@@ -325,4 +363,26 @@
   padding-top: 10px;
   margin-top: 10px;
 }
+
+.custom-modal .modal-body {
+  max-height: 70vh; /* Set max height to 70% of the viewport */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds max height */
+  padding: 15px; /* Adjust padding for better appearance */
+}
+
+.custom-modal .modal-dialog {
+  margin: auto;
+  max-width: 800px; /* Adjust width to ensure it fits well */
+  max-height: 90vh; /* Ensure overall modal doesn't exceed screen height */
+}
+
+.modal-body .row {
+  margin-bottom: 10px; /* Compact spacing between rows */
+}
+
+h6 {
+  font-size: 14px; /* Adjust heading size */
+  text-transform: uppercase;
+}
+
 
