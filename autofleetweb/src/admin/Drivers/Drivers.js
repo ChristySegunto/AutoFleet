@@ -109,8 +109,10 @@ const Drivers = () => {
   };
 
   const filteredDrivers = renterList.filter(driver =>
-    driver.renter_fname.toLowerCase().includes(searchQuery.toLowerCase()) // ||
-    //driver.carModel.toLowerCase().includes(searchQuery.toLowerCase())
+    driver.renter_fname.toLowerCase().includes(searchQuery.toLowerCase())  ||
+    driver.renter_mname.toLowerCase().includes(searchQuery.toLowerCase())  ||
+    driver.renter_lname.toLowerCase().includes(searchQuery.toLowerCase())  ||
+    driver.renter_email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
