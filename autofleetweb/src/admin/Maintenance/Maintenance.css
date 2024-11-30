@@ -169,3 +169,52 @@
 .modal-maintenance-close{
     border: 0;
 }
+
+.Maintenance .status-pending {
+    color: #CC3C3C;
+    background-color: #FFD9D9;
+    border: 0;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.Maintenance .status-pending:hover {
+    color: #d03131;
+    background-color: #ffa9a9;
+    border: 0;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.Maintenance .status-under-maintenance {
+    color: #767676;
+    background-color: #E6E6E6;
+    border: 0;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.Maintenance .status-under-maintenance:hover {
+    color: #585858;
+    background-color: #bdbcbc;
+    border: 0;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.Maintenance .status-completed{
+    color: #68B031;
+    background-color: #D1F1B9;
+    border: 0;
+    border-radius: 15px;
+    text-align: center;
+}
+
+
+.Maintenance .status-completed:hover{
+    color: #73ab48;
+    background-color: #b5ee8a;
+    border: 0;
+    border-radius: 15px;
+    text-align: center;
+}
