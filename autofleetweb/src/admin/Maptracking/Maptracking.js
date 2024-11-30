@@ -23,7 +23,6 @@ function Maptracking() {
         car_model: '',
         plate_number: '',
     });
-
     const [renterIdCounter, setRenterIdCounter] = useState(3); // Start renter_id from 3
 
     const mapContainerRef = useRef(null);
@@ -45,20 +44,21 @@ function Maptracking() {
         const rentedVehicleData = {
             renter_fname: newRentedVehicle.renter_fname,
             renter_lname: newRentedVehicle.renter_lname,
-            pickup_loc: "Default Pickup Location", // Update as needed
-            pickup_date: newRentedVehicle.pickup_date,
+            pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(),
             pickup_time: newRentedVehicle.pickup_time,
-            dropoff_loc: "Default Drop-off Location", // Update as needed
-            dropoff_date: newRentedVehicle.dropoff_date,
+            dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(),
             dropoff_time: newRentedVehicle.dropoff_time,
             car_manufacturer: newRentedVehicle.car_manufacturer,
             car_model: newRentedVehicle.car_model,
             plate_number: newRentedVehicle.plate_number,
-            rent_status: "Pending", // Default status
-            renter_id: renterIdCounter, // Use the current renter_id counter
-            vehicle_id: 1, // Replace with actual vehicle ID
+            rent_status: "Pending",
+            renter_id: renterIdCounter,
+            vehicle_id: 1, // Replace with actual vehicle ID if needed
         };
-
+    
+        // Log the request body to the console to inspect its structure
+        console.log('Request Body:', rentedVehicleData);
+    
         axios.post('http://localhost:5028/api/RentedVehicle/add', rentedVehicleData)
             .then((response) => {
                 alert("Rented vehicle added successfully!");
@@ -75,13 +75,17 @@ function Maptracking() {
                     plate_number: '',
                 });
                 setShowModal(false);
-                setRenterIdCounter((prevId) => prevId + 1); // Increment renter_id after adding a new vehicle
+                setRenterIdCounter((prevId) => prevId + 1);
             })
             .catch((error) => {
-                console.error('Error adding rented vehicle:', error);
+                // Log error details for debugging
+                console.error('Error adding rented vehicle:', error.response?.data || error.message);
+                console.log('Error response:', error.response);  // Log the full error response
                 alert(`Failed to add data: ${error.response?.data || error.message}`);
             });
     };
+    
+    
 
     // Handle input changes in the form
     const handleInputChange = (e) => {
@@ -173,17 +177,95 @@ function Maptracking() {
                 <Modal.Body>
                     <Form>
                         {/* Form Inputs */}
-                        {Object.keys(newRentedVehicle).map((field) => (
-                            <Form.Group className="mb-3" key={field}>
-                                <Form.Label>{field.replace('_', ' ')}</Form.Label>
-                                <Form.Control
-                                    name={field}
-                                    value={newRentedVehicle[field]}
-                                    onChange={handleInputChange}
-                                    placeholder={`Enter ${field.replace('_', ' ')}`}
-                                />
-                            </Form.Group>
-                        ))}
+                        <Form.Group className="mb-3">
+                            <Form.Label>Renter First Name</Form.Label>
+                            <Form.Control
+                                name="renter_fname"
+                                value={newRentedVehicle.renter_fname}
+                                onChange={handleInputChange}
+                                placeholder="Enter first name"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Renter Last Name</Form.Label>
+                            <Form.Control
+                                name="renter_lname"
+                                value={newRentedVehicle.renter_lname}
+                                onChange={handleInputChange}
+                                placeholder="Enter last name"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Pick-up Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="pickup_date"
+                                value={newRentedVehicle.pickup_date}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Pick-up Time</Form.Label>
+                            <Form.Control
+                                type="time"
+                                name="pickup_time"
+                                value={newRentedVehicle.pickup_time}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Drop-off Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="dropoff_date"
+                                value={newRentedVehicle.dropoff_date}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Drop-off Time</Form.Label>
+                            <Form.Control
+                                type="time"
+                                name="dropoff_time"
+                                value={newRentedVehicle.dropoff_time}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Car Manufacturer</Form.Label>
+                            <Form.Control
+                                name="car_manufacturer"
+                                value={newRentedVehicle.car_manufacturer}
+                                onChange={handleInputChange}
+                                placeholder="Enter car manufacturer"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Car Model</Form.Label>
+                            <Form.Control
+                                name="car_model"
+                                value={newRentedVehicle.car_model}
+                                onChange={handleInputChange}
+                                placeholder="Enter car model"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Plate Number</Form.Label>
+                            <Form.Control
+                                name="plate_number"
+                                value={newRentedVehicle.plate_number}
+                                onChange={handleInputChange}
+                                placeholder="Enter plate number"
+                            />
+                        </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
