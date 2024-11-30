@@ -80,7 +80,7 @@ function Dashboard() {
         if (response.ok) {
           const data = await response.json();
           console.log("Admin Data:", data); // Check if data is logged correctly
-          setAdminDetails({ fname: data.firstName, lname: data.lastName });
+          setAdminDetails({ fname: data.firstName, lname: data.lastName, adminId: data.adminId });
           setFname(adminDetails.fname);
           setLname(adminDetails.lname);
         } else {

@@ -173,13 +173,13 @@
     font-size: 1.1rem;
   }
   
-  .search-icon {
+  .dsearch-icon {
     position: absolute;
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
     color: #9ca3af;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
   
   .add-schedule-container {
@@ -329,6 +329,11 @@
     gap: 1.5rem;
   }
   
+  .id-photo{
+    height: 200px;
+    width: 300px;
+
+  }
   /* Scrollbar Styling */
   .drivers-grid::-webkit-scrollbar,
   .details-card::-webkit-scrollbar {

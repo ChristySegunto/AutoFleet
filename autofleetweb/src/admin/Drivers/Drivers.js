@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import { Form, Button, Alert, Modal, Container } from 'react-bootstrap';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Drivers.css';
@@ -14,6 +15,17 @@ const Drivers = () => {
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [renterList, setRenterList] = useState([]);
+  const [renterFname, setRenterFname] = useState("");
+  const [renterMname, setRenterMname] = useState("");
+  const [renterLname, setRenterLname] = useState("");
+  const [renterBirthday, setRenterBirthday] = useState("");
+  const [renterContactNumber, setRenterContactNumber] = useState("");
+  const [renterEmail, setRenterEmail] = useState("");
+  const [renterEmergencyContact, setRenterEmergencyContact] = useState("");
+  const [renterAddress, setRenterAddress] = useState("");
+  const [renterIdPhoto, setRenterIdPhoto] = useState("");
+
   const [email, setEmail] = useState('');
   const [formData, setFormData] = useState({
     email: '',
@@ -23,6 +35,44 @@ const Drivers = () => {
 
   const [errors, setErrors] = useState({});  
   const [emailTouched, setEmailTouched] = useState(false);
+
+
+  useEffect(() => {
+    axios.get('http://localhost:5028/api/Renter/list') // Adjust the URL as needed
+      .then(response => {
+        setRenterList(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching renter list:", error);
+      });
+  }, []);
+
+  const handleSave = () => {
+  const newRenter = {
+    renter_fname: renterFname,
+    renter_mname: renterMname,
+    renter_lname: renterLname,
+    renter_birthday: renterBirthday,
+    renter_contact_num: renterContactNumber,
+    renter_email: renterEmail,
+    renter_emergency_contact: renterEmergencyContact,
+    renter_address: renterAddress,
+    renter_id_photo_1: renterIdPhoto,
+    user_id: adminDetails?.adminId
+  };
+
+  console.log("New Renter Data:", newRenter);
+
+ // Send POST request to your backend
+    axios.post('http://localhost:5028/api/Renter/addRenter', newRenter)
+      .then(response => {
+        alert("Renter added successfully!");
+      })
+      .catch(error => {
+        console.error("Error adding renter:", error);
+        alert(`Failed to add renter: ${error.response?.data || error.message}`);
+      });
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,69 +108,11 @@ const Drivers = () => {
     });
   };
 
-  const drivers = [
-    {
-      id: 1,
-      status: 'COMPLETED',
-      name: 'JUAN DELA CRUZ',
-      carModel: 'Toyota Hiace',
-      contactNumber: '09123-456-789',
-      email: 'JuanDC@Gmail.com',
-      address: '123 Herbosa St.',
-      emergencyContact: '09123-456-789',
-      pickupLocation: '123 Herbosa St.',
-      pickupDate: '11/09/2024',
-      pickupTime: '11:00AM',
-      dropoffLocation: '123 Herbosa St.',
-      dropoffDate: '11/09/2024',
-      dropoffTime: '11:00AM',
-      photos: [
-        nationalid
-      ]
-    },
-    {
-      id: 2,
-      status: 'ONGOING',
-      name: 'ANGEL DEL MONTE',
-      carModel: 'Toyota Hiace',
-      contactNumber: '09123-456-789',
-      email: 'JuanDC@Gmail.com',
-      address: '123 Herbosa St.',
-      emergencyContact: '09123-456-789',
-      pickupLocation: '123 Herbosa St.',
-      pickupDate: '11/09/2024',
-      pickupTime: '11:00AM',
-      dropoffLocation: '123 Herbosa St.',
-      dropoffDate: '11/09/2024',
-      dropoffTime: '11:00AM',
-      photos: [
-        nationalid
-      ]
-    },
-    {
-      id: 3,
-      status: 'ONGOING',
-      name: 'JOSE DEVERA',
-      carModel: 'Toyota Hiace',
-      contactNumber: '09123-456-789',
-      email: 'JuanDC@Gmail.com',
-      address: '123 Herbosa St.',
-      emergencyContact: '09123-456-789',
-      pickupLocation: '123 Herbosa St.',
-      pickupDate: '11/09/2024',
-      pickupTime: '11:00AM',
-      dropoffLocation: '123 Herbosa St.',
-      dropoffDate: '11/09/2024',
-      dropoffTime: '11:00AM',
-      photos: [
-        nationalid
-      ]
-    },
-  ];
-
-  const filteredDrivers = drivers.filter(driver =>
-    driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    driver.carModel.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDrivers = renterList.filter(driver =>
+    driver.renter_fname.toLowerCase().includes(searchQuery.toLowerCase())  ||
+    driver.renter_mname.toLowerCase().includes(searchQuery.toLowerCase())  ||
+    driver.renter_lname.toLowerCase().includes(searchQuery.toLowerCase())  ||
+    driver.renter_email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -129,7 +121,7 @@ const Drivers = () => {
       <header className="header">
         <div className="header-content">
           <div className="vehicle-header">
-            <h1>RENT SCHEDULE</h1>
+            <h1>RENTER</h1>
             <p>Welcome Back, {adminDetails?.fname}</p>
           </div>
           <div className="header-actions">
@@ -149,10 +141,10 @@ const Drivers = () => {
           {/* Left Panel - Driver List */}
           <div className="driver-list">
             <div className="search-container">
-              <i className="fas fa-search search-icon"></i>
+              <i className="fas fa-search dsearch-icon"></i>
               <input
                 type="text"
-                placeholder=" Search Files"
+                placeholder=" Search Renter"
                 className="search-input"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -164,7 +156,7 @@ const Drivers = () => {
                 className="add-schedule-btn" 
                 onClick={() => setShowAddVehicleModal(true)}
               >
-                Add Schedule
+                Add Renter
               </button>
             </div>
 
@@ -178,13 +170,10 @@ const Drivers = () => {
                   <div className="driver-info">
                     <img className="avatar" src="/api/placeholder/50/50" alt="" />
                     <div>
-                      <div className="drivers-name">{driver.name}</div>
-                      <div className="driver-car">{driver.carModel}</div>
-                      <div className="driver-pickup">{driver.pickupDate}</div>
-                      <div className={`status-indicator ${driver.status === 'COMPLETED' ? 'status-ONGOING' : 'status-COMPLETED'}`}>
-                        {driver.status}
-                      </div>
+                      <div className="drivers-name">{driver.renter_fname} {driver.renter_mname} {driver.renter_lname}</div>
+                      <div className="driver-email">{driver.renter_email}</div>
                     </div>
+
                   </div>
                 </div>
               ))}
@@ -195,16 +184,16 @@ const Drivers = () => {
           {selectedDriver && (
             <div className="driver-details">
               <div className="details-card">
-                <div className="driver-header">{selectedDriver.name}</div>
-                <div className="reg-number">Car to be Rented: {selectedDriver.carModel}</div>
+                <div className="driver-header">{selectedDriver.renter_fname} {selectedDriver.renter_mname} {selectedDriver.renter_lname}</div>
+                <div className="reg-number">Birthday: {selectedDriver.birthDay}</div>
 
                 <div className="details-content">
-                  {selectedDriver.contactNumber && (
+                  {selectedDriver.renter_contact_num && (
                     <div className="info-section">
-                      <div>Contact Number: {selectedDriver.contactNumber}</div>
-                      <div>Email: {selectedDriver.email}</div>
-                      <div>Address: {selectedDriver.address}</div>
-                      <div>Emergency Contact: {selectedDriver.email}</div>
+                      <div>Contact Number: {selectedDriver.renter_contact_num}</div>
+                      <div>Email: {selectedDriver.renter_email}</div>
+                      <div>Address: {selectedDriver.renter_address}</div>
+                      <div>Emergency Contact: {selectedDriver.renter_emergency_contact}</div>
                     </div>
                   )}
 
@@ -219,18 +208,15 @@ const Drivers = () => {
                     </div>
                   )}
 
-                  {selectedDriver.photos && (
+                  {selectedDriver.renter_id_photo_1 && (
                     <div className="photos-section">
                       <div className="photos-header">GOVERNMENT-ISSUED ID</div>
                       <div className="photos-grid">
-                        {selectedDriver.photos.map((photo, index) => (
                           <img
-                            key={index}
-                            src={photo}
+                            src={selectedDriver.renter_id_photo_1}
                             alt={`GOV ID`}
                             className="id-photo"
                           />
-                        ))}
                       </div>
                     </div>
                   )}
@@ -250,7 +236,7 @@ const Drivers = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title className="text w-100" style={{ fontWeight: 'bold', color: '#f76d20' }}>
-            ADD VEHICLE
+            ADD RENTER
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -260,104 +246,116 @@ const Drivers = () => {
             <div className="row">
               <Form.Group className="col-md-4">
                 <Form.Label>First Name</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter first name" />
+                <Form.Control 
+                  value={renterFname} 
+                  onChange={(e) => setRenterFname(e.target.value)}
+                  size="sm" 
+                  type="text" 
+                  placeholder="Enter first name" 
+                />
               </Form.Group>
               <Form.Group className="col-md-4">
                 <Form.Label>Middle Name</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter middle name" />
+                <Form.Control 
+                  value={renterMname} 
+                  onChange={(e) => setRenterMname(e.target.value)}
+                  size="sm" 
+                  type="text" 
+                  placeholder="Enter middle name" 
+                />
               </Form.Group>
               <Form.Group className="col-md-4">
                 <Form.Label>Last Name</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter last name" />
+                <Form.Control 
+                  value={renterLname} 
+                  onChange={(e) => setRenterLname(e.target.value)}
+                  size="sm" 
+                  type="text" 
+                  placeholder="Enter last name" 
+                />
               </Form.Group>
             </div>
+
             <div className="row">
-              <Form.Group className="col-md-6">
+            <Form.Group className="col-md-6">
                 <Form.Label>Birthday</Form.Label>
-                <Form.Control size="sm" type="date" />
+                <Form.Control
+                  value={renterBirthday ? renterBirthday.toString().slice(0, 10) : ""}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    const formattedDate = selectedDate.toISOString().slice(0, 10);
+                    setRenterBirthday(formattedDate);
+                  }}
+                  size="sm"
+                  type="date"
+                />
               </Form.Group>
               <Form.Group className="col-md-6">
                 <Form.Label>Email</Form.Label>
-                <Form.Control size="sm" type="email" placeholder="Enter email" />
+                <Form.Control 
+                  value={renterEmail} 
+                  onChange={(e) => setRenterEmail(e.target.value)}
+                  size="sm" 
+                  type="email" 
+                  placeholder="Enter email"
+                />
               </Form.Group>
             </div>
             <div className="row">
-              <Form.Group className="col-md-6">
+            <Form.Group className="col-md-6">
                 <Form.Label>Contact Number</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter contact number" />
+                <Form.Control 
+                  value={renterContactNumber} 
+                  onChange={(e) => setRenterContactNumber(e.target.value)}
+                  size="sm" 
+                  type="text" 
+                  placeholder="Enter contact number"
+                />
               </Form.Group>
               <Form.Group className="col-md-6">
                 <Form.Label>Emergency Contact</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter emergency contact" />
+                <Form.Control 
+                  value={renterEmergencyContact} 
+                  onChange={(e) => setRenterEmergencyContact(e.target.value)}
+                  size="sm" 
+                  type="text" 
+                  placeholder="Enter emergency contact"
+                />
               </Form.Group>
             </div>
             <div className="row">
-              <Form.Group className="col-md-12">
+            <Form.Group className="col-md-12">
                 <Form.Label>Address</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter address" />
+                <Form.Control 
+                  value={renterAddress} 
+                  onChange={(e) => setRenterAddress(e.target.value)}
+                  size="sm" 
+                  type="text" 
+                  placeholder="Enter address"
+                />
               </Form.Group>
             </div>
             <div className="row">
-              <Form.Group className="col-md-12">
+            <Form.Group className="col-md-12">
                 <Form.Label>Upload ID</Form.Label>
-                <Form.Control size="sm" type="file" />
+                <Form.Control 
+                  value={renterIdPhoto} 
+                  onChange={(e) => setRenterIdPhoto(e.target.value)}
+                  size="sm" 
+                  type="text" 
+                />
               </Form.Group>
             </div>
           </Form>
-
-          {/* Rent Details */}
-          <h6 style={{ color: '#003399', fontWeight: 'bold', marginTop: '15px', marginBottom: '10px' }}>
-            RENT DETAILS
-          </h6>
-          <Form>
-            <div className="row">
-              <Form.Group className="col-md-6">
-                <Form.Label>Pick Up Location</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter pick-up location" />
-              </Form.Group>
-              <Form.Group className="col-md-6">
-                <Form.Label>Drop Off Location</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter drop-off location" />
-              </Form.Group>
-            </div>
-            <div className="row">
-              <Form.Group className="col-md-3">
-                <Form.Label>Start Date of Rent</Form.Label>
-                <Form.Control size="sm" type="date" />
-              </Form.Group>
-              <Form.Group className="col-md-3">
-                <Form.Label>Start Time of Rent</Form.Label>
-                <Form.Control size="sm" type="time" />
-              </Form.Group>
-              <Form.Group className="col-md-3">
-                <Form.Label>End Date of Rent</Form.Label>
-                <Form.Control size="sm" type="date" />
-              </Form.Group>
-              <Form.Group className="col-md-3">
-                <Form.Label>End Time of Rent</Form.Label>
-                <Form.Control size="sm" type="time" />
-              </Form.Group>
-            </div>
-          </Form>
-
-          {/* Vehicle Details */}
-          <h6 style={{ color: '#003399', fontWeight: 'bold', marginTop: '15px', marginBottom: '10px' }}>
-            VEHICLE DETAILS
-          </h6>
-          <Form>
-            <div className="row">
-              <Form.Group className="col-md-6">
-                <Form.Label>Car to be Rented</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter car name/model" />
-              </Form.Group>
-              <Form.Group className="col-md-6">
-                <Form.Label>Plate Number</Form.Label>
-                <Form.Control size="sm" type="text" placeholder="Enter plate number" />
-              </Form.Group>
-            </div>
-          </Form>
+      
         </Modal.Body>
         <Modal.Footer className="justify-content-center">
+
+        <Button className='modal-renter-save' onClick={handleSave}> 
+            Save Changes 
+          </Button>
+        {/* PANSAMANTALA MUNA NA DITO MUNA TO DI PA TAPOS YUNG SA EMAIL NA MAY BACKEND*/}
+
           <Button
             variant="primary"
             style={{
