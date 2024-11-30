@@ -313,7 +313,6 @@
 }
 
 .Dashboard .upcoming-trips-table{
-    margin-top: 20px;
     border-collapse: separate !important;
     border-spacing: 0 10px !important;
 }
@@ -407,3 +406,42 @@
     color: red !important;
     text-transform: uppercase;
 }
+
+.scrollable-notifications {
+    max-height: 300px; /* Set the max height of the notifications container */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    margin-top: 10px;   /* Optional: Add space between the title and table */
+  }
+
+.Dashboard .no-notif {
+    color:#A2A2A2;
+}
+
+.upcoming-trip-item {
+    background-color: #EFEFEF;
+    margin-bottom: 5px;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.notification-header {
+    color: #A2A2A2;
+}
+
+.notification-details .name {
+    color: #094985;
+    font-size: 20px;
+    margin: 0;
+}
+
+.notification-details .type {
+    color: #A2A2A2;
+    margin: 0;
+}
+
+.notification-details .date {
+    color: #A2A2A2;
+    margin: 0;
+}
+
+
