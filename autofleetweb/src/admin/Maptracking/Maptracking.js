@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Form, Button, Container, Row, Col, Card, Modal } from 'react-bootstrap';
 import { FaUser, FaPlus } from 'react-icons/fa';
 import './Maptracking.css';
-import { AuthContext } from './../../settings/AuthContext.js';
+import { AuthContext } from '../../settings/AuthContext.js';
 
 function Maptracking() {
     const { adminDetails } = useContext(AuthContext);
@@ -26,6 +26,7 @@ function Maptracking() {
     const [renterIdCounter, setRenterIdCounter] = useState(3); // Start renter_id from 3
 
     const mapContainerRef = useRef(null);
+    const mapInstanceRef = useRef(null);
 
     // Fetch all rented vehicles from the backend
     useEffect(() => {
@@ -37,7 +38,50 @@ function Maptracking() {
                 console.error('Error fetching rented vehicles:', error);
                 alert(`Failed to fetch data: ${error.response?.data || error.message}`);
             });
-    }, []);
+
+        // Initialize the Mapbox map
+        mapboxgl.accessToken = 'pk.eyJ1Ijoicm9jaGVsbGVib3JyIiwiYSI6ImNtM29rejZnazA0Z3Mya3NkZ2g4YXd5cnIifQ.4Pso-euXHqkZMUmz7Dpegw'; // Replace with your Mapbox access token
+        const map = new mapboxgl.Map({
+            container: mapContainerRef.current, // Reference to the container element
+            style: 'mapbox://styles/mapbox/streets-v11', // Map style
+            center: [120.9842, 14.5995], // New center [longitude, latitude] for Manila, Philippines
+            zoom: 12, // Adjust zoom level to better fit the region
+        });
+        
+        // Fetch car data from API
+        axios.get('http://localhost:5028/api/CarUpdate') // Replace with your API endpoint
+            .then((response) => {
+                const cars = response.data; // Ensure your API returns an array of car objects
+                cars.forEach(car => {
+                    if (car.location_longitude && car.location_latitude) {
+                        new mapboxgl.Marker()
+                            .setLngLat([car.location_longitude, car.location_latitude]) // Set pin location
+                            .setPopup(
+                                new mapboxgl.Popup({ offset: 25 }).setText(
+                                    `Car ID: ${car.carupdate_id}`
+                                ) // Optional popup with Car ID
+                            )
+                            .addTo(map); // Add pin to map
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error('Error fetching car data:', error);
+                alert('Failed to fetch car locations');
+            });
+        
+        // Add navigation controls (zoom, rotation, etc.)
+        map.addControl(new mapboxgl.NavigationControl());
+        
+        // Cleanup map on component unmount
+        return () => {
+            if (map) {
+                map.remove();
+            }
+        };
+        
+
+    }, []);  // Empty dependency array ensures this effect runs once when the component mounts
 
     // Add a new rented vehicle
     const addRentedVehicle = () => {
@@ -51,9 +95,15 @@ function Maptracking() {
             car_manufacturer: newRentedVehicle.car_manufacturer,
             car_model: newRentedVehicle.car_model,
             plate_number: newRentedVehicle.plate_number,
+<<<<<<< Updated upstream
             rent_status: "Pending",
             renter_id: renterIdCounter,
             vehicle_id: 1, // Replace with actual vehicle ID if needed
+=======
+            rent_status: "Pending", 
+            renter_id: renterIdCounter,
+            vehicle_id: 1, 
+>>>>>>> Stashed changes
         };
     
         // Log the request body to the console to inspect its structure
@@ -78,9 +128,13 @@ function Maptracking() {
                 setRenterIdCounter((prevId) => prevId + 1);
             })
             .catch((error) => {
+<<<<<<< Updated upstream
                 // Log error details for debugging
                 console.error('Error adding rented vehicle:', error.response?.data || error.message);
                 console.log('Error response:', error.response);  // Log the full error response
+=======
+                console.error('Error adding rented vehicle:', error.response?.data || error.message);
+>>>>>>> Stashed changes
                 alert(`Failed to add data: ${error.response?.data || error.message}`);
             });
     };
@@ -103,7 +157,7 @@ function Maptracking() {
 
     return (
         <Container fluid className="Maptracking">
-            {/* Header Section */}
+            {/* Header and main content sections */}
             <Row className="align-items-center justify-content-between mb-3">
                 <Col xs="auto">
                     <div className="map-header">
@@ -152,6 +206,7 @@ function Maptracking() {
                 </Col>
 
                 <Col md={9}>
+                    {/* Map Container */}
                     <div ref={mapContainerRef} style={{ width: '100%', height: '800px' }} />
                     {selectedVehicle && (
                         <Card className="selected-vehicle-card">
