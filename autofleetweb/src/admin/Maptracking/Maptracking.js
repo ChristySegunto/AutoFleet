@@ -23,10 +23,12 @@ function Maptracking() {
         car_model: '',
         plate_number: '',
     });
+
     const [renterIdCounter, setRenterIdCounter] = useState(3); // Start renter_id from 3
 
     const mapContainerRef = useRef(null);
     const mapInstanceRef = useRef(null);
+
 
     // Fetch all rented vehicles from the backend
     useEffect(() => {
@@ -38,6 +40,7 @@ function Maptracking() {
                 console.error('Error fetching rented vehicles:', error);
                 alert(`Failed to fetch data: ${error.response?.data || error.message}`);
             });
+
 
         // Initialize the Mapbox map
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm9jaGVsbGVib3JyIiwiYSI6ImNtM29rejZnazA0Z3Mya3NkZ2g4YXd5cnIifQ.4Pso-euXHqkZMUmz7Dpegw'; // Replace with your Mapbox access token
@@ -83,11 +86,13 @@ function Maptracking() {
 
     }, []);  // Empty dependency array ensures this effect runs once when the component mounts
 
+
     // Add a new rented vehicle
     const addRentedVehicle = () => {
         const rentedVehicleData = {
             renter_fname: newRentedVehicle.renter_fname,
             renter_lname: newRentedVehicle.renter_lname,
+
             pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(),
             pickup_time: newRentedVehicle.pickup_time,
             dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(),
@@ -95,20 +100,30 @@ function Maptracking() {
             car_manufacturer: newRentedVehicle.car_manufacturer,
             car_model: newRentedVehicle.car_model,
             plate_number: newRentedVehicle.plate_number,
-<<<<<<< Updated upstream
             rent_status: "Pending",
             renter_id: renterIdCounter,
             vehicle_id: 1, // Replace with actual vehicle ID if needed
-=======
-            rent_status: "Pending", 
-            renter_id: renterIdCounter,
-            vehicle_id: 1, 
->>>>>>> Stashed changes
         };
     
         // Log the request body to the console to inspect its structure
         console.log('Request Body:', rentedVehicleData);
     
+
+            pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(), // Convert to ISO string
+            pickup_time: newRentedVehicle.pickup_time, // Ensure it's in TimeSpan format
+            dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(), // Convert to ISO string
+            dropoff_time: newRentedVehicle.dropoff_time, // Ensure it's in TimeSpan format
+            car_manufacturer: newRentedVehicle.car_manufacturer,
+            car_model: newRentedVehicle.car_model,
+            plate_number: newRentedVehicle.plate_number,
+            rent_status: "Pending", // Default status
+            renter_id: renterIdCounter,
+            vehicle_id: 1, // Replace with actual vehicle ID
+        };
+
+        console.log('Request Body:', rentedVehicleData); // Add this line to check the sent data
+
+
         axios.post('http://localhost:5028/api/RentedVehicle/add', rentedVehicleData)
             .then((response) => {
                 alert("Rented vehicle added successfully!");
@@ -128,14 +143,11 @@ function Maptracking() {
                 setRenterIdCounter((prevId) => prevId + 1);
             })
             .catch((error) => {
-<<<<<<< Updated upstream
+
                 // Log error details for debugging
                 console.error('Error adding rented vehicle:', error.response?.data || error.message);
                 console.log('Error response:', error.response);  // Log the full error response
-=======
-                console.error('Error adding rented vehicle:', error.response?.data || error.message);
->>>>>>> Stashed changes
-                alert(`Failed to add data: ${error.response?.data || error.message}`);
+                setRenterIdCounter((prevId) => prevId + 1); // Increment renter_id after adding a new vehicle
             });
     };
     
@@ -206,7 +218,9 @@ function Maptracking() {
                 </Col>
 
                 <Col md={9}>
+
                     {/* Map Container */}
+
                     <div ref={mapContainerRef} style={{ width: '100%', height: '800px' }} />
                     {selectedVehicle && (
                         <Card className="selected-vehicle-card">
@@ -321,6 +335,19 @@ function Maptracking() {
                                 placeholder="Enter plate number"
                             />
                         </Form.Group>
+
+//                         {Object.keys(newRentedVehicle).map((field) => (
+//                             <Form.Group className="mb-3" key={field}>
+//                                 <Form.Label>{field.replace('_', ' ')}</Form.Label>
+//                                 <Form.Control
+//                                     name={field}
+//                                     value={newRentedVehicle[field]}
+//                                     onChange={handleInputChange}
+//                                     placeholder={`Enter ${field.replace('_', ' ')}`}
+//                                 />
+//                             </Form.Group>
+//                         ))}
+
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

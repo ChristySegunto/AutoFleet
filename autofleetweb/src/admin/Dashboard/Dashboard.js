@@ -11,15 +11,18 @@ import user from './../../img/user.png';
 
 import { AuthContext } from './../../settings/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
+import * as signalR from "@microsoft/signalr";
+import NotificationManager from './../Notif/NotificationManager';
 
 
 ChartJS.register(ArcElement, Tooltip, Legend); 
 
 
 
-
 function Dashboard() {
   const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
+  const { notifications, unreadCount, markAsRead } = NotificationManager();
+
   const [error, setError] = useState(null); // For error handling
   const [isLoading, setIsLoading] = useState(true);
   
@@ -36,6 +39,8 @@ function Dashboard() {
   const [lname, setLname] = useState();
 
   const [recentBookings, setRecentBookings] = useState([]);
+  const [todaySched, setTodaySched] = useState([]);
+  // const { notifications, markNotificationAsRead } = useNotifications();
 
 
   const fleetstatusdata = {
@@ -64,7 +69,7 @@ function Dashboard() {
     maintainAspectRatio: false, // Allows for better control over sizing
   };
 
-  console.log(user.user_id)
+
 
   // Fetch admin details based on user id
   useEffect(() => {
@@ -184,6 +189,45 @@ function Dashboard() {
     fetchRecentBookings();
   }, []);
   
+  useEffect(() => {
+    const fetchTodaysSchedules = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5028/api/Dashboard/get-today-schedules'); // API endpoint for today's schedules
+        if (response.ok) {
+          const data = await response.json();
+          console.log("API Response Data for Notifications: ", data); // Log the full API response
+
+          // Combine rentalSchedules and maintenanceSchedules into one array
+          const combinedSchedules = [
+            ...data.rentalSchedules.map(schedule => ({
+              ...schedule,
+              type: 'Rental', // Add a type field for identification
+            })),
+            ...data.maintenanceSchedules.map(schedule => ({
+              ...schedule,
+              type: 'Maintenance', // Add a type field for identification
+            }))
+          ];
+
+          console.log("Combined Schedules: ", combinedSchedules); // Log the combined schedules before filtering
+
+          setTodaySched(combinedSchedules);
+
+        } else {
+          setError('Failed to fetch today\'s schedules.');
+        }
+      } catch (error) {
+        setError('Error fetching today\'s schedules: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchTodaysSchedules();
+  }, []);
+
+  
 
   if (isLoading) {
     return (
@@ -213,7 +257,10 @@ function Dashboard() {
             {adminDetails?.fname} {adminDetails?.lname }
           </Button>
         </div>
+        
       </div>
+
+      
 
       <div className="dashboard-content">
         <Row className="w-100 m-0 d-flex flex-row flex-grow-1">
@@ -274,36 +321,38 @@ function Dashboard() {
               <div>
                 <h4 style={{ margin: '0', padding: '0' }}>NOTIFICATIONS</h4>
               </div>
-              <div className='upcoming-trips-table '>
-                <table className="table">
-                  <tbody>
-                    <tr className='upcoming-trips-custom-table'>
-                      <td>
-                        <div className='about'>
-                          <h4>Notif 1</h4>
-                          <p>Driver: Juan Dela Cruz</p>
+
+              <div className='upcoming-trips-container'>
+                <div className="scrollable-notifications">
+                  {todaySched.length > 0 ? (
+                    todaySched.map((notification, index) => (
+                      <div key={index} className='upcoming-trip-item'>
+                        <div className="notification-header">
+                          {notification.type}
                         </div>
-                      </td>
-                    </tr>
-                    <tr className='upcoming-trips-custom-table'>
-                      <td className='td-custom'>
-                        <div className='about'>
-                          <h4>Notif 2</h4>
-                          <p>Driver: Juan Dela Cruz</p>
+                        <div className="notification-details">
+                          <p className='name'>
+                            <strong>{notification.type === 'Rental' ? notification.renterName : notification.carModel}</strong>
+                          </p>
+                          <p className='type'>
+                            {notification.type === 'Rental' ? 
+                              notification.vehicleName :
+                              `Maintenance Type: ${notification.maintenanceType}`}
+                          </p>
+                          <p className='date'>
+                            {notification.type === 'Rental' ? 
+                              `Pickup: ${new Date(notification.pickupDate).toLocaleString()}` :
+                              `Due Date: ${new Date(notification.maintenanceDueDate).toLocaleDateString()}`}
+                          </p>
                         </div>
-                      </td>
-                    </tr>
-                    <tr className='upcoming-trips-custom-table'>
-                      <td>
-                        <div className='about'>
-                          <h4>Notif 3</h4>
-                          <p>Driver: Juan Dela Cruz</p>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center no-notif">No notifications for today.</div>
+                  )}
+                </div>
               </div>
+
             </Row>
           </Col>
 
@@ -362,6 +411,22 @@ function Dashboard() {
           </Row>
 
         </Row>
+
+        <div className="notification-list">
+          {notifications.length > 0 ? (
+            notifications.map((notification) => (
+              <div 
+                key={notification.id} 
+                className={`notification-item ${notification.read ? 'read' : 'unread'}`}
+              >
+                <p>{notification.message}</p>
+                <button onClick={() => markAsRead(notification.id)}>Mark as Read</button>
+              </div>
+            ))
+          ) : (
+            <p>No new notifications</p>
+          )}
+        </div>
 
       </div>
     </div>

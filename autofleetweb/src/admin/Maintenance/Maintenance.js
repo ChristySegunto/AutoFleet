@@ -5,7 +5,6 @@ import axios from 'axios';
 import { Form, Button, Alert, Modal, Container, Row, Col } from 'react-bootstrap';
 import { FaBell, FaSearch, FaUser } from 'react-icons/fa';
 
-
 import { AuthContext } from './../../settings/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,6 +31,21 @@ function Maintenance() {
     "Battery Replacement": 365, // 365 days (1 year)
     "Transmission Service": 365, // 365 days (1 year)
   };
+
+  const statusColors = {
+    "Pending": "#CC3C3C",
+    "Under Maintenance": "#767676",
+    "Completed": "#68B031",
+  };
+
+  const statusBgColors = {
+    "Pending": "#FFD9D9",
+    "Under Maintenance": "#E6E6E6",
+    "Completed": "#D1F1B9",
+  };
+
+  const getStatusColor = (status) => statusColors[status] || "gray";
+
 
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
@@ -139,6 +153,41 @@ function Maintenance() {
       });
   };
 
+  const handleStatusChange = (maintenance_id, newStatus) => {
+    const maintenance = maintenanceList.find(item => item.maintenance_id === maintenance_id);
+    
+    if (!maintenance) {
+      alert('Maintenance record not found.');
+      return;
+    }
+  
+    // Construct the payload with maintenance_id and other necessary fields
+    const updateData = {
+      maintenance_id: maintenance.maintenance_id,  // Correctly reference maintenance_id
+      maintenance_status: newStatus,
+      car_model: maintenance.car_model,            // Include car_model in the request
+      plate_num: maintenance.plate_num,            // Include plate_num in the request
+      maintenance_type: maintenance.maintenance_type, // Include maintenance_type in the request
+    };
+  
+    // Send PUT request to the backend
+    axios
+      .put(`http://localhost:5028/api/Maintenance/updateStatus/${maintenance.maintenance_id}`, updateData)
+      .then(() => {
+        setMaintenanceList(prevList =>
+          prevList.map(item =>
+            item.maintenance_id === maintenance.maintenance_id ? { ...item, maintenance_status: newStatus } : item
+          )
+        );
+        alert("Status updated successfully!");
+      })
+      .catch(error => {
+        console.error("Error updating status:", error);
+        alert(`Failed to update status: ${error.response?.data || error.message}`);
+      });
+  };
+  
+
   return (
     <div className="Maintenance">
       <div className='header-maintenance'>
@@ -186,7 +235,18 @@ function Maintenance() {
                     <td>{maintenance.maintenance_type || "N/A"}</td>
                     <td>{maintenance.dueDate || "N/A"}</td>
                     <td>{maintenance.nextDueDate || "N/A"}</td>
-                    <td className='text-center'>{maintenance.maintenance_status || "N/A"}</td>
+                    <td className={`text-center`}>
+                      <Form.Control
+                        as="select"
+                        value={maintenance.maintenance_status}
+                        onChange={(e) => handleStatusChange(maintenance.maintenance_id, e.target.value)}
+                        className={`status-${maintenance.maintenance_status.toLowerCase().replace(' ', '-')}`}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Under Maintenance">Under Maintenance</option>
+                        <option value="Completed">Completed</option>
+                      </Form.Control>
+                    </td>
                     <td className='text-center'>
                       <i className="fas fa-trash" style={{ cursor: 'pointer'}}></i>
                     </td>
