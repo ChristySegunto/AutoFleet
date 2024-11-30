@@ -45,19 +45,19 @@ function Maptracking() {
         const rentedVehicleData = {
             renter_fname: newRentedVehicle.renter_fname,
             renter_lname: newRentedVehicle.renter_lname,
-            pickup_loc: "Default Pickup Location", // Update as needed
-            pickup_date: newRentedVehicle.pickup_date,
-            pickup_time: newRentedVehicle.pickup_time,
-            dropoff_loc: "Default Drop-off Location", // Update as needed
-            dropoff_date: newRentedVehicle.dropoff_date,
-            dropoff_time: newRentedVehicle.dropoff_time,
+            pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(), // Convert to ISO string
+            pickup_time: newRentedVehicle.pickup_time, // Ensure it's in TimeSpan format
+            dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(), // Convert to ISO string
+            dropoff_time: newRentedVehicle.dropoff_time, // Ensure it's in TimeSpan format
             car_manufacturer: newRentedVehicle.car_manufacturer,
             car_model: newRentedVehicle.car_model,
             plate_number: newRentedVehicle.plate_number,
             rent_status: "Pending", // Default status
-            renter_id: renterIdCounter, // Use the current renter_id counter
+            renter_id: renterIdCounter,
             vehicle_id: 1, // Replace with actual vehicle ID
         };
+
+        console.log('Request Body:', rentedVehicleData); // Add this line to check the sent data
 
         axios.post('http://localhost:5028/api/RentedVehicle/add', rentedVehicleData)
             .then((response) => {
