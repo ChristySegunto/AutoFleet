@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Form, Button, Container, Row, Col, Card, Modal } from 'react-bootstrap';
 import { FaUser, FaPlus } from 'react-icons/fa';
 import './Maptracking.css';
-import { AuthContext } from './../../settings/AuthContext.js';
+import { AuthContext } from '../../settings/AuthContext.js';
 
 function Maptracking() {
     const { adminDetails } = useContext(AuthContext);
@@ -27,6 +27,8 @@ function Maptracking() {
     const [renterIdCounter, setRenterIdCounter] = useState(3); // Start renter_id from 3
 
     const mapContainerRef = useRef(null);
+    const mapInstanceRef = useRef(null);
+
 
     // Fetch all rented vehicles from the backend
     useEffect(() => {
@@ -38,13 +40,75 @@ function Maptracking() {
                 console.error('Error fetching rented vehicles:', error);
                 alert(`Failed to fetch data: ${error.response?.data || error.message}`);
             });
-    }, []);
+
+
+        // Initialize the Mapbox map
+        mapboxgl.accessToken = 'pk.eyJ1Ijoicm9jaGVsbGVib3JyIiwiYSI6ImNtM29rejZnazA0Z3Mya3NkZ2g4YXd5cnIifQ.4Pso-euXHqkZMUmz7Dpegw'; // Replace with your Mapbox access token
+        const map = new mapboxgl.Map({
+            container: mapContainerRef.current, // Reference to the container element
+            style: 'mapbox://styles/mapbox/streets-v11', // Map style
+            center: [120.9842, 14.5995], // New center [longitude, latitude] for Manila, Philippines
+            zoom: 12, // Adjust zoom level to better fit the region
+        });
+        
+        // Fetch car data from API
+        axios.get('http://localhost:5028/api/CarUpdate') // Replace with your API endpoint
+            .then((response) => {
+                const cars = response.data; // Ensure your API returns an array of car objects
+                cars.forEach(car => {
+                    if (car.location_longitude && car.location_latitude) {
+                        new mapboxgl.Marker()
+                            .setLngLat([car.location_longitude, car.location_latitude]) // Set pin location
+                            .setPopup(
+                                new mapboxgl.Popup({ offset: 25 }).setText(
+                                    `Car ID: ${car.carupdate_id}`
+                                ) // Optional popup with Car ID
+                            )
+                            .addTo(map); // Add pin to map
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error('Error fetching car data:', error);
+                alert('Failed to fetch car locations');
+            });
+        
+        // Add navigation controls (zoom, rotation, etc.)
+        map.addControl(new mapboxgl.NavigationControl());
+        
+        // Cleanup map on component unmount
+        return () => {
+            if (map) {
+                map.remove();
+            }
+        };
+        
+
+    }, []);  // Empty dependency array ensures this effect runs once when the component mounts
+
 
     // Add a new rented vehicle
     const addRentedVehicle = () => {
         const rentedVehicleData = {
             renter_fname: newRentedVehicle.renter_fname,
             renter_lname: newRentedVehicle.renter_lname,
+
+            pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(),
+            pickup_time: newRentedVehicle.pickup_time,
+            dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(),
+            dropoff_time: newRentedVehicle.dropoff_time,
+            car_manufacturer: newRentedVehicle.car_manufacturer,
+            car_model: newRentedVehicle.car_model,
+            plate_number: newRentedVehicle.plate_number,
+            rent_status: "Pending",
+            renter_id: renterIdCounter,
+            vehicle_id: 1, // Replace with actual vehicle ID if needed
+        };
+    
+        // Log the request body to the console to inspect its structure
+        console.log('Request Body:', rentedVehicleData);
+    
+
             pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(), // Convert to ISO string
             pickup_time: newRentedVehicle.pickup_time, // Ensure it's in TimeSpan format
             dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(), // Convert to ISO string
@@ -58,6 +122,7 @@ function Maptracking() {
         };
 
         console.log('Request Body:', rentedVehicleData); // Add this line to check the sent data
+
 
         axios.post('http://localhost:5028/api/RentedVehicle/add', rentedVehicleData)
             .then((response) => {
@@ -75,13 +140,18 @@ function Maptracking() {
                     plate_number: '',
                 });
                 setShowModal(false);
-                setRenterIdCounter((prevId) => prevId + 1); // Increment renter_id after adding a new vehicle
+                setRenterIdCounter((prevId) => prevId + 1);
             })
             .catch((error) => {
-                console.error('Error adding rented vehicle:', error);
-                alert(`Failed to add data: ${error.response?.data || error.message}`);
+
+                // Log error details for debugging
+                console.error('Error adding rented vehicle:', error.response?.data || error.message);
+                console.log('Error response:', error.response);  // Log the full error response
+                setRenterIdCounter((prevId) => prevId + 1); // Increment renter_id after adding a new vehicle
             });
     };
+    
+    
 
     // Handle input changes in the form
     const handleInputChange = (e) => {
@@ -99,7 +169,7 @@ function Maptracking() {
 
     return (
         <Container fluid className="Maptracking">
-            {/* Header Section */}
+            {/* Header and main content sections */}
             <Row className="align-items-center justify-content-between mb-3">
                 <Col xs="auto">
                     <div className="map-header">
@@ -148,6 +218,9 @@ function Maptracking() {
                 </Col>
 
                 <Col md={9}>
+
+                    {/* Map Container */}
+
                     <div ref={mapContainerRef} style={{ width: '100%', height: '800px' }} />
                     {selectedVehicle && (
                         <Card className="selected-vehicle-card">
@@ -173,17 +246,108 @@ function Maptracking() {
                 <Modal.Body>
                     <Form>
                         {/* Form Inputs */}
-                        {Object.keys(newRentedVehicle).map((field) => (
-                            <Form.Group className="mb-3" key={field}>
-                                <Form.Label>{field.replace('_', ' ')}</Form.Label>
-                                <Form.Control
-                                    name={field}
-                                    value={newRentedVehicle[field]}
-                                    onChange={handleInputChange}
-                                    placeholder={`Enter ${field.replace('_', ' ')}`}
-                                />
-                            </Form.Group>
-                        ))}
+                        <Form.Group className="mb-3">
+                            <Form.Label>Renter First Name</Form.Label>
+                            <Form.Control
+                                name="renter_fname"
+                                value={newRentedVehicle.renter_fname}
+                                onChange={handleInputChange}
+                                placeholder="Enter first name"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Renter Last Name</Form.Label>
+                            <Form.Control
+                                name="renter_lname"
+                                value={newRentedVehicle.renter_lname}
+                                onChange={handleInputChange}
+                                placeholder="Enter last name"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Pick-up Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="pickup_date"
+                                value={newRentedVehicle.pickup_date}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Pick-up Time</Form.Label>
+                            <Form.Control
+                                type="time"
+                                name="pickup_time"
+                                value={newRentedVehicle.pickup_time}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Drop-off Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="dropoff_date"
+                                value={newRentedVehicle.dropoff_date}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Drop-off Time</Form.Label>
+                            <Form.Control
+                                type="time"
+                                name="dropoff_time"
+                                value={newRentedVehicle.dropoff_time}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Car Manufacturer</Form.Label>
+                            <Form.Control
+                                name="car_manufacturer"
+                                value={newRentedVehicle.car_manufacturer}
+                                onChange={handleInputChange}
+                                placeholder="Enter car manufacturer"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Car Model</Form.Label>
+                            <Form.Control
+                                name="car_model"
+                                value={newRentedVehicle.car_model}
+                                onChange={handleInputChange}
+                                placeholder="Enter car model"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Plate Number</Form.Label>
+                            <Form.Control
+                                name="plate_number"
+                                value={newRentedVehicle.plate_number}
+                                onChange={handleInputChange}
+                                placeholder="Enter plate number"
+                            />
+                        </Form.Group>
+
+//                         {Object.keys(newRentedVehicle).map((field) => (
+//                             <Form.Group className="mb-3" key={field}>
+//                                 <Form.Label>{field.replace('_', ' ')}</Form.Label>
+//                                 <Form.Control
+//                                     name={field}
+//                                     value={newRentedVehicle[field]}
+//                                     onChange={handleInputChange}
+//                                     placeholder={`Enter ${field.replace('_', ' ')}`}
+//                                 />
+//                             </Form.Group>
+//                         ))}
+
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
