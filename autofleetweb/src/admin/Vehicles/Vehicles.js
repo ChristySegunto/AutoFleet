@@ -69,8 +69,8 @@ const Vehicles = () => {
   
   const handleRemove = (vehicle) => {
     console.log("Remove vehicle", vehicle);
-    // Update URL to match the backend route
-    axios.delete(`http://localhost:5028/api/Vehicle/deleteVehicle/${vehicle.vehicle_id}`)
+    // Correct the delete URL to match the backend route
+    axios.delete(`http://localhost:5028/api/Vehicle/${vehicle.vehicle_id}`)
       .then(response => {
         alert("Vehicle removed successfully!");
         setVehicles(prevList => prevList.filter(v => v.vehicle_id !== vehicle.vehicle_id));
@@ -83,15 +83,40 @@ const Vehicles = () => {
 
   const validateForm = () => {
     const newErrors = {};
+  
+    // Check required fields
     if (!selectedVehicle?.plate_number) newErrors.plate_number = "Plate number is required.";
     if (!selectedVehicle?.car_model) newErrors.car_model = "Car model is required.";
     if (!selectedVehicle?.vehicle_status) newErrors.vehicle_status = "Vehicle status is required.";
+  
+    // Check for numeric fields (e.g., total_mileage should be a number and >= 0)
+    if (!selectedVehicle?.total_mileage || isNaN(selectedVehicle.total_mileage) || selectedVehicle.total_mileage < 0) {
+      newErrors.total_mileage = "Total mileage must be a positive number.";
+    }
+  
+    // Validate other numeric fields like total_fuel_consumption, distance_traveled
+    if (!selectedVehicle?.total_fuel_consumption || isNaN(selectedVehicle.total_fuel_consumption) || selectedVehicle.total_fuel_consumption < 0) {
+      newErrors.total_fuel_consumption = "Total fuel consumption must be a positive number.";
+    }
+  
+    if (!selectedVehicle?.distance_traveled || isNaN(selectedVehicle.distance_traveled) || selectedVehicle.distance_traveled < 0) {
+      newErrors.distance_traveled = "Distance traveled must be a positive number.";
+    }
+  
+    // Check if seating_capacity is a valid integer
+    if (selectedVehicle?.seating_capacity && !Number.isInteger(Number(selectedVehicle.seating_capacity))) {
+      newErrors.seating_capacity = "Seating capacity must be an integer.";
+    }
+  
+    // Set the errors
     setErrors(newErrors);
+  
+    // If there are any errors, return false to prevent form submission
     return Object.keys(newErrors).length === 0;
   };
-
+  
   const handleSave = () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return;  // If validation fails, do not proceed
   
     const newVehicle = {
       plate_number: selectedVehicle.plate_number,
@@ -120,7 +145,7 @@ const Vehicles = () => {
   
     const request = selectedVehicle.vehicle_id
       ? axios.put(`http://localhost:5028/api/Vehicle/${selectedVehicle.vehicle_id}`, newVehicle) // Update
-      : axios.post("http://localhost:5028/api/Vehicle/add", newVehicle); // Add
+      : axios.post("http://localhost:5028/api/Vehicle", newVehicle); // Add
   
     request
       .then((response) => {
@@ -129,7 +154,7 @@ const Vehicles = () => {
         setVehicles((prevList) => {
           if (selectedVehicle.vehicle_id) {
             // Update existing vehicle
-            return prevList.map(v => 
+            return prevList.map((v) =>
               v.vehicle_id === selectedVehicle.vehicle_id ? response.data : v
             );
           } else {
@@ -143,7 +168,7 @@ const Vehicles = () => {
         alert(`Failed to save vehicle: ${error.response?.data || error.message}`);
       });
   };
-  
+
   return (
     <div className="vehicles-container">
       <div className="top-ribbon">
@@ -275,6 +300,7 @@ const Vehicles = () => {
                             onChange={(e) => setSelectedVehicle({ ...selectedVehicle, plate_number: e.target.value })}
                             disabled={modalMode === 'view'}
                           />
+                          {errors.plate_number && <Form.Text className="text-danger">{errors.plate_number}</Form.Text>}
                         </Form.Group>
 
                         <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="carModel">
@@ -287,6 +313,7 @@ const Vehicles = () => {
                             onChange={(e) => setSelectedVehicle({ ...selectedVehicle, car_model: e.target.value })}
                             disabled={modalMode === 'view'}
                           />
+                          {errors.car_model && <Form.Text className="text-danger">{errors.car_model}</Form.Text>}
                         </Form.Group>
 
                         <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="vehicleStatus">
@@ -301,8 +328,9 @@ const Vehicles = () => {
                             <option value="Available">Active</option>
                             <option value="Pending">Pending</option>
                             <option value="Rented">Rented</option>
-                            <option value="On Maintenance">Maintenance</option>
+                            <option value="On Maintenance">On Maintenance</option>
                           </Form.Select>
+                          {errors.vehicle_status && <Form.Text className="text-danger">{errors.vehicle_status}</Form.Text>}
                         </Form.Group>
                       </Row>
                       <hr />
@@ -322,6 +350,7 @@ const Vehicles = () => {
                           onChange={(e) => setSelectedVehicle({ ...selectedVehicle, fuel_type: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
+                        {errors.fuel_type && <Form.Text className="text-danger">{errors.fuel_type}</Form.Text>}
                       </Form.Group>
 
                       <Form.Group className="modal-vehicle-formgroup" controlId="vehicleTransmission">
@@ -334,6 +363,7 @@ const Vehicles = () => {
                           onChange={(e) => setSelectedVehicle({ ...selectedVehicle, transmission_type: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
+                        {errors.transmission_type && <Form.Text className="text-danger">{errors.transmission_type}</Form.Text>}
                       </Form.Group>
 
                       <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCapacity">
@@ -346,6 +376,7 @@ const Vehicles = () => {
                           onChange={(e) => setSelectedVehicle({ ...selectedVehicle, seating_capacity: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
+                        {errors.seating_capacity && <Form.Text className="text-danger">{errors.seating_capacity}</Form.Text>}
                       </Form.Group>
                     </Row>
 
@@ -360,6 +391,7 @@ const Vehicles = () => {
                           onChange={(e) => setSelectedVehicle({ ...selectedVehicle, total_mileage: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
+                        {errors.total_mileage && <Form.Text className="text-danger">{errors.total_mileage}</Form.Text>}
                       </Form.Group>
 
                       <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCategory">
@@ -372,6 +404,7 @@ const Vehicles = () => {
                           onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_category: e.target.value })}
                           disabled={modalMode === 'view'}
                         />
+                        {errors.vehicle_category && <Form.Text className="text-danger">{errors.vehicle_category}</Form.Text>}
                       </Form.Group>
                     </Row>
                   </Col>
