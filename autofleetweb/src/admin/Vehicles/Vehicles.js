@@ -14,15 +14,11 @@ const Vehicles = () => {
   const [activeTab, setActiveTab] = useState('details');
   const [errors, setErrors] = useState({});
 
-  // Fetch vehicles data from the backend (replace with your actual API URL)
+  // Fetch vehicles data from the backend
   useEffect(() => {
-    axios.get('http://localhost:5028/api/Vehicle/list') // Adjust the URL as needed
-      .then(response => {
-        setVehicles(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching vehicles:", error);
-      });
+    axios.get('http://localhost:5028/api/Vehicle/list')
+      .then(response => setVehicles(response.data))
+      .catch(error => console.error("Error fetching vehicles:", error));
   }, []);
 
   const handleShow = () => {
@@ -50,28 +46,41 @@ const Vehicles = () => {
     setShowModal(false);
     setSelectedVehicle(null);
     setActiveTab('details');
-    setErrors({});  // Clear errors on modal close
+    setErrors({}); // Clear errors
   };
 
   const handleRowClick = (vehicle) => {
-    setSelectedVehicle(vehicle);
+    const formattedVehicle = {
+      ...vehicle,
+      created_at: vehicle.created_at ? new Date(vehicle.created_at).toISOString().slice(0, 10) : '',
+      updated_at: vehicle.updated_at ? new Date(vehicle.updated_at).toISOString().slice(0, 10) : '',
+    };
+  
+    // Log the vehicle and the formatted dates for debugging
+    console.log("Selected Vehicle:", formattedVehicle);
+    console.log("Formatted created_at:", formattedVehicle.created_at);
+    console.log("Formatted updated_at:", formattedVehicle.updated_at);
+  
+    setSelectedVehicle(formattedVehicle);
     setModalMode('view');
     setShowModal(true);
     setActiveTab('details');
   };
 
   const handleEdit = (vehicle) => {
-    setSelectedVehicle(vehicle);
+    setSelectedVehicle({
+      ...vehicle,
+      created_at: vehicle.created_at ? new Date(vehicle.created_at).toISOString().slice(0, 10) : '',
+      updated_at: vehicle.updated_at ? new Date(vehicle.updated_at).toISOString().slice(0, 10) : '',
+    });
     setModalMode('edit');
     setShowModal(true);
     setActiveTab('details');
   };
-  
+
   const handleRemove = (vehicle) => {
-    console.log("Remove vehicle", vehicle);
-    // Correct the delete URL to match the backend route
     axios.delete(`http://localhost:5028/api/Vehicle/${vehicle.vehicle_id}`)
-      .then(response => {
+      .then(() => {
         alert("Vehicle removed successfully!");
         setVehicles(prevList => prevList.filter(v => v.vehicle_id !== vehicle.vehicle_id));
       })
@@ -83,40 +92,37 @@ const Vehicles = () => {
 
   const validateForm = () => {
     const newErrors = {};
-  
-    // Check required fields
     if (!selectedVehicle?.plate_number) newErrors.plate_number = "Plate number is required.";
     if (!selectedVehicle?.car_model) newErrors.car_model = "Car model is required.";
     if (!selectedVehicle?.vehicle_status) newErrors.vehicle_status = "Vehicle status is required.";
-  
-    // Check for numeric fields (e.g., total_mileage should be a number and >= 0)
-    if (!selectedVehicle?.total_mileage || isNaN(selectedVehicle.total_mileage) || selectedVehicle.total_mileage < 0) {
+    if (!selectedVehicle?.total_mileage || isNaN(selectedVehicle.total_mileage) || selectedVehicle.total_mileage < 0)
       newErrors.total_mileage = "Total mileage must be a positive number.";
-    }
-  
-    // Validate other numeric fields like total_fuel_consumption, distance_traveled
-    if (!selectedVehicle?.total_fuel_consumption || isNaN(selectedVehicle.total_fuel_consumption) || selectedVehicle.total_fuel_consumption < 0) {
+    if (!selectedVehicle?.total_fuel_consumption || isNaN(selectedVehicle.total_fuel_consumption) || selectedVehicle.total_fuel_consumption < 0)
       newErrors.total_fuel_consumption = "Total fuel consumption must be a positive number.";
-    }
-  
-    if (!selectedVehicle?.distance_traveled || isNaN(selectedVehicle.distance_traveled) || selectedVehicle.distance_traveled < 0) {
+    if (!selectedVehicle?.distance_traveled || isNaN(selectedVehicle.distance_traveled) || selectedVehicle.distance_traveled < 0)
       newErrors.distance_traveled = "Distance traveled must be a positive number.";
-    }
-  
-    // Check if seating_capacity is a valid integer
-    if (selectedVehicle?.seating_capacity && !Number.isInteger(Number(selectedVehicle.seating_capacity))) {
+    if (selectedVehicle?.seating_capacity && !Number.isInteger(Number(selectedVehicle.seating_capacity)))
       newErrors.seating_capacity = "Seating capacity must be an integer.";
-    }
-  
-    // Set the errors
     setErrors(newErrors);
-  
-    // If there are any errors, return false to prevent form submission
     return Object.keys(newErrors).length === 0;
   };
   
   const handleSave = () => {
-    if (!validateForm()) return;  // If validation fails, do not proceed
+    if (!validateForm()) return; // If validation fails, do not proceed
+  
+    // Ensure that created_at and updated_at are initialized if they are undefined
+    const formatDate = (date) => {
+      const d = new Date(date || new Date());
+      d.setHours(0, 0, 0, 0); // Set time to 00:00:00
+      return d.toISOString().split('T')[0]; // Get only the date part (YYYY-MM-DD)
+    };
+  
+    const created_at = formatDate(selectedVehicle.created_at);
+    const updated_at = formatDate(selectedVehicle.updated_at);
+  
+    // Log the formatted dates for debugging
+    console.log("Formatted created_at:", created_at);
+    console.log("Formatted updated_at:", updated_at);
   
     const newVehicle = {
       plate_number: selectedVehicle.plate_number,
@@ -132,42 +138,33 @@ const Vehicles = () => {
       total_fuel_consumption: selectedVehicle.total_fuel_consumption,
       distance_traveled: selectedVehicle.distance_traveled,
       vehicle_status: selectedVehicle.vehicle_status,
-      created_at: selectedVehicle.created_at || new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: created_at, // Date without time
+      updated_at: updated_at, // Date without time
     };
   
-    // Include vehicle_id only for updates
-    if (selectedVehicle.vehicle_id) {
-      newVehicle.vehicle_id = selectedVehicle.vehicle_id;
-    }
-  
-    console.log("New Vehicle Data:", newVehicle);
-  
+    // If we are updating an existing vehicle, include vehicle_id
     const request = selectedVehicle.vehicle_id
-      ? axios.put(`http://localhost:5028/api/Vehicle/${selectedVehicle.vehicle_id}`, newVehicle) // Update
-      : axios.post("http://localhost:5028/api/Vehicle", newVehicle); // Add
+      ? axios.put(`http://localhost:5028/api/Vehicle/${selectedVehicle.vehicle_id}`, newVehicle)
+      : axios.post("http://localhost:5028/api/Vehicle", newVehicle);
   
     request
-      .then((response) => {
+      .then(response => {
         alert("Vehicle saved successfully!");
         setShowModal(false);
-        setVehicles((prevList) => {
+        setVehicles(prevList => {
           if (selectedVehicle.vehicle_id) {
-            // Update existing vehicle
-            return prevList.map((v) =>
-              v.vehicle_id === selectedVehicle.vehicle_id ? response.data : v
-            );
+            return prevList.map(v => v.vehicle_id === selectedVehicle.vehicle_id ? response.data : v);
           } else {
-            // Add new vehicle
             return [...prevList, response.data];
           }
         });
       })
-      .catch((error) => {
+      .catch(error => {
         console.error("Error saving vehicle:", error);
         alert(`Failed to save vehicle: ${error.response?.data || error.message}`);
       });
   };
+  
 
   return (
     <div className="vehicles-container">
@@ -337,7 +334,7 @@ const Vehicles = () => {
                     </>
                   )}
 
-<Col>
+                  <Col>
                     <Modal.Title className="modal-vehicle-title">VEHICLE SPECS</Modal.Title>
                     <Row md={3}>
                       <Form.Group className="modal-vehicle-formgroup" controlId="vehicleFuel">
@@ -503,14 +500,17 @@ const Vehicles = () => {
                   <Row md={2}>
                     <Form.Group className="modal-vehicle-formgroup" controlId="createdAt">
                       <Form.Label className="modal-vehicle-label">
-                        {modalMode === 'add' ? 'Created At' : 'Created Date'}
+                        {modalMode === 'add' ? 'Initial Create Date' : 'Created At'}
                       </Form.Label>
                       <Form.Control 
                         className="modal-vehicle-control" 
-                        type="datetime-local" 
-                        value={selectedVehicle?.created_at ? new Date(selectedVehicle.created_at).toISOString().slice(0, 16) : ''} 
-                        disabled={true} // Always disable created_at field
-                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, created_at: e.target.value })} 
+                        type="date" 
+                        value={selectedVehicle?.created_at ? new Date(selectedVehicle.created_at).toISOString().slice(0, 10) : ''} // Ensure date is in YYYY-MM-DD format
+                        disabled={modalMode === 'view'}
+                        onChange={(e) => setSelectedVehicle({
+                          ...selectedVehicle, 
+                          created_at: e.target.value // Update selectedVehicle with the new date value
+                        })}
                       />
                     </Form.Group>
 
@@ -520,10 +520,13 @@ const Vehicles = () => {
                       </Form.Label>
                       <Form.Control 
                         className="modal-vehicle-control" 
-                        type="datetime-local" 
-                        value={selectedVehicle?.updated_at ? new Date(selectedVehicle.updated_at).toISOString().slice(0, 16) : ''} 
+                        type="date" 
+                        value={selectedVehicle?.updated_at ? new Date(selectedVehicle.updated_at).toISOString().slice(0, 10) : ''} // Ensure date is in YYYY-MM-DD format
                         disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, updated_at: e.target.value })} 
+                        onChange={(e) => setSelectedVehicle({
+                          ...selectedVehicle, 
+                          updated_at: e.target.value // Update selectedVehicle with the new date value
+                        })}
                       />
                     </Form.Group>
                   </Row>
