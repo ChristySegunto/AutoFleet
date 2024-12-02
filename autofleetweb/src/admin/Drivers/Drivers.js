@@ -1,18 +1,25 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Form, Button, Alert, Modal, Container } from 'react-bootstrap';
+import { Form, Button, Modal } from 'react-bootstrap';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Drivers.css';
 import { AuthContext } from './../../settings/AuthContext.js';
-import { FaBell, FaSearch, FaUser } from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
 
 const Drivers = () => {
-  const { user, adminDetails, setAdminDetails } = useContext(AuthContext);
+  const { adminDetails } = useContext(AuthContext);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
+  
+  // Email verification state
+  const [email, setEmail] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  
+  // Renter Details State
   const [renterList, setRenterList] = useState([]);
   const [renterFname, setRenterFname] = useState("");
   const [renterMname, setRenterMname] = useState("");
@@ -24,28 +31,67 @@ const Drivers = () => {
   const [renterAddress, setRenterAddress] = useState("");
   const [renterIdPhoto, setRenterIdPhoto] = useState("");
 
-  const [email, setEmail] = useState('');
+  // Account Creation State
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: ''
   });
 
-  const [errors, setErrors] = useState({});  
-  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     fetchRenterList();
   }, []);
 
-  const fetchRenterList = () => {
-    axios.get('http://localhost:5028/api/Renter/list') 
-      .then(response => {
-        setRenterList(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching renter list:", error);
-      });
+  const fetchRenterList = async () => {
+    try {
+      const response = await axios.get('http://localhost:5028/api/Renter/list');
+      setRenterList(response.data);
+    } catch (error) {
+      console.error("Error fetching renter list:", error);
+      alert("Failed to fetch renters");
+    }
+  };
+
+  const checkEmailUniqueness = async (emailToCheck) => {
+    try {
+      const response = await axios.get(`http://localhost:5028/api/Renter/check-email?email=${emailToCheck}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error checking email:", error);
+      return false;
+    }
+  };
+
+  const handleEmailVerification = async () => {
+    setEmailTouched(true);
+    setEmailError('');
+
+    if (!email) {
+      setEmailError('Email is required');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Invalid email format');
+      return;
+    }
+
+    try {
+      const isUnique = await checkEmailUniqueness(email);
+      
+      if (isUnique) {
+        setShowCreateAccount(false);
+        setRenterEmail(email);
+        setShowAddVehicleModal(true);
+      } else {
+        setEmailError('User already exists');
+      }
+    } catch (error) {
+      setEmailError('Error verifying email');
+    }
   };
 
   const handleInputChange = (e) => {
@@ -56,12 +102,18 @@ const Drivers = () => {
     }));
   };
 
-  const handleSubmitAccount = (e) => {
+  const handleSubmitAccount = async (e) => {
     e.preventDefault();
-    
-    // Validate password match
+    setPasswordError('');
+
+    // Validate password
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setPasswordError("Passwords do not match");
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setPasswordError("Password must be at least 8 characters");
       return;
     }
 
@@ -79,39 +131,24 @@ const Drivers = () => {
       password: formData.password
     };
 
-    // Prepare a temporary ID for immediate rendering
-    const tempId = Date.now();
-    const tempRenter = { ...newRenter, id: tempId };
-
-    // Optimistically add the renter to the list
-    const updatedRenterList = [...renterList, tempRenter];
-    setRenterList(updatedRenterList);
-
-    axios.post('http://localhost:5028/api/Renter/addRenter', newRenter)
-      .then(response => {
-        // Replace the temporary renter with the actual response from server
-        const actualRenter = response.data;
-        setRenterList(prevList => 
-          prevList.map(renter => 
-            renter.id === tempId ? actualRenter : renter
-          )
-        );
-        
-        alert("Renter and account added successfully!");
-        setShowAccountModal(false);
-        
-        // Reset form data
-        resetFormFields();
-      })
-      .catch(error => {
-        // If API fails, remove the temporary renter
-        setRenterList(prevList => 
-          prevList.filter(renter => renter.id !== tempId)
-        );
-        
-        console.error("Error adding renter:", error);
-        alert(`Failed to add renter: ${error.response?.data || error.message}`);
-      });
+    try {
+      const response = await axios.post('http://localhost:5028/api/Renter/addRenter', newRenter);
+      
+      // Update local list with new renter
+      setRenterList(prev => [...prev, response.data]);
+      
+      // Reset modals and forms
+      setShowAccountModal(false);
+      setShowAddVehicleModal(false);
+      
+      // Reset all form fields
+      resetFormFields();
+      
+      alert("Renter added successfully!");
+    } catch (error) {
+      console.error("Error adding renter:", error);
+      alert(error.response?.data || "Failed to add renter");
+    }
   };
 
   const resetFormFields = () => {
@@ -129,20 +166,14 @@ const Drivers = () => {
       password: '',
       confirmPassword: ''
     });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setShowCreateAccount(false);
-    setShowAccountModal(true);
     setEmail('');
   };
 
   const filteredDrivers = renterList.filter(driver =>
-    driver.renter_fname.toLowerCase().includes(searchQuery.toLowerCase())  ||
-    driver.renter_mname.toLowerCase().includes(searchQuery.toLowerCase())  ||
-    driver.renter_lname.toLowerCase().includes(searchQuery.toLowerCase())  ||
-    driver.renter_email.toLowerCase().includes(searchQuery.toLowerCase())
+    driver.renter_fname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    driver.renter_mname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    driver.renter_lname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    driver.renter_email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
   return (
@@ -257,88 +288,92 @@ const Drivers = () => {
         </div>
       </main>
 
+    
      {/* Verify Email Modal */}
-<Modal
-  show={showCreateAccount}
-  onHide={() => setShowCreateAccount(false)}
-  size="md"
-  centered
-  className="simple-account-modal"
->
-  <Modal.Header closeButton>
-    <Modal.Title
-      className="w-100"
-      style={{
-        color: '#f76d20',
-        fontSize: '24px',
-        fontWeight: 'bold',
-      }}
-    >
-      INPUT YOUR EMAIL ADDRESS
-    </Modal.Title>
-  </Modal.Header>
-  <Modal.Body className="px-4 py-3">
-    <Form noValidate>
-      <Form.Group className="mb-4">
-        <Form.Label style={{ color: '#000', marginBottom: '8px' }}>Email</Form.Label>
-        <Form.Control
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter email"
-          style={{
-            border: 'none',
-            borderBottom: '1px solid #ced4da',
-            borderRadius: '0',
-            padding: '8px 0',
-            boxShadow: 'none',
-          }}
-          isInvalid={!email && emailTouched}
-        />
-        <Form.Control.Feedback type="invalid">
-          Email is required.
-        </Form.Control.Feedback>
-      </Form.Group>
-
-      <div className="d-flex flex-column align-items-center">
-      <Button
-        className="w-100 mb-3"
-        variant="dark"
-        style={{
-          backgroundColor: '#003399',
-          border: 'none',
-          borderRadius: '4px',
-          padding: '10px',
-        }}
-        onClick={() => {
-          if (!email) {
-            setEmailTouched(true); 
-            return; 
-          }
+     <Modal
+        show={showCreateAccount}
+        onHide={() => {
           setShowCreateAccount(false);
-          setShowAddVehicleModal(true); 
+          setEmailTouched(false);
+          setEmailError('');
         }}
+        size="md"
+        centered
+        className="simple-account-modal"
       >
-        Verify
-      </Button>
+        <Modal.Header closeButton>
+          <Modal.Title
+            className="w-100"
+            style={{
+              color: '#f76d20',
+              fontSize: '24px',
+              fontWeight: 'bold',
+            }}
+          >
+            INPUT YOUR EMAIL ADDRESS
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="px-4 py-3">
+          <Form noValidate>
+            <Form.Group className="mb-4">
+              <Form.Label style={{ color: '#000', marginBottom: '8px' }}>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailTouched(true);
+                  setEmailError('');
+                }}
+                placeholder="Enter email"
+                style={{
+                  border: 'none',
+                  borderBottom: '1px solid #ced4da',
+                  borderRadius: '0',
+                  padding: '8px 0',
+                  boxShadow: 'none',
+                }}
+                isInvalid={!!emailError}
+              />
+              {emailError && (
+                <Form.Control.Feedback type="invalid">
+                  {emailError}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
 
-      <span
-        style={{
-          color: '#003399',
-          textDecoration: 'underline',
-          cursor: 'pointer',
-        }}
-        onClick={() => {
-          setShowCreateAccount(false);
-          setShowAddVehicleModal(true); 
-        }}
-      >
-        Create an account
-      </span>
-      </div>
-    </Form>
-  </Modal.Body>
-</Modal>
+            <div className="d-flex flex-column align-items-center">
+              <Button
+                className="w-100 mb-3"
+                variant="dark"
+                style={{
+                  backgroundColor: '#003399',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '10px',
+                }}
+                onClick={handleEmailVerification}
+              >
+                Verify
+              </Button>
+
+              <span
+                style={{
+                  color: '#003399',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  setShowCreateAccount(false);
+                  setShowAddVehicleModal(true); 
+                }}
+              >
+                Create an account
+              </span>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
 
         {/* Personal Details Modal */}
         <Modal
