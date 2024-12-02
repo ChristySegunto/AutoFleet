@@ -1,15 +1,10 @@
+
 .Maptracking {
     padding: 20px;
     background-color: #fffaf7;
 }
 
-.title-text {
-    color: #ff6a18;
-    font-weight: bold;
-    font-size: 1.5em;
-}
-
-.Maptracking  .map-header {
+.Maptracking .map-header {
     color: #ff6a18;
 }
 
@@ -23,27 +18,24 @@
     color: #ff6a18;
 }
 
-.Maptracking .header-button{
-    display: flex;
-}
-
 .Maptracking .user-button {
     height: 50px;
     border-radius: 50px;
     background-color: #FF6A18;
     border: none;
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
+    color: white;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
 }
 
-.Maptracking .user-button:hover{
+.Maptracking .user-button:hover {
     background-color: #05202e;
-    color: #fff;
 }
 
-.Maptracking  .user-icon{
+.Maptracking .user-icon {
     background-color: #fff;
     border-radius: 50%;
     color: #FF8C4C;
@@ -52,160 +44,296 @@
     height: 30px;
 }
 
-.Maptracking .icon-container {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
 .main-content {
-    background-color: #fffaf7; 
+    background-color: #fffaf7;
     padding: 20px;
-    border-radius: 10px; 
-}
-
-.subtitle-text {
-    color: #ff6a18;
-    font-size: 1.1em;
-    margin: 0;
-}
-
-.mb-0 {
-    margin-bottom: 0;
-}
-
-.icon-button {
-    border: none;
-    background: transparent;
-    margin: 0 5px;
-    color: #6c757d;
-}
-
-.icon-circle {
-    background-color: #023047;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-}
-
-.profile-section {
-    padding: 5px 10px;
-    border-radius: 20px;
-    background-color: #ff6a18;
-    font-weight: 500;
-    color: #f1f3f5;
-}
-
-.user-icon {
-    color: #f1f3f5;
-}
-
-.divider {
-    border-top: solid #ff6a18;
-    margin: 10px 0;
-    color: #ff6a18;
 }
 
 .search-box {
+    background-color: #fff;
     padding: 20px;
-    background-color: #fffaf7;
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);  
-}
-
-.search-icon {
-    background-color: #ffffff;
-    border: none;
-    color: #6c757d;
-    font-size: 1.5em;  
-    padding: 10px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .search-box .form-control {
-    font-size: 1.2em;  
-    padding: 10px;  
-    border-radius: 10px; 
+    font-size: 1.1em;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.search-box .form-control:focus {
+    border-color: #ff6a18;
+    box-shadow: 0 0 5px rgba(255, 106, 24, 0.3);
 }
 
 .search-box .form-group {
-    margin-bottom: 1em;
+    margin-bottom: 1.5em;
 }
 
-
-.map-display {
-    display: flex;
-    justify-content: center;
-}
 .map-container {
     position: relative;
     width: 100%;
-    height: 100%;
-}
-
-
-.trip-card {
-    background-color: #ffffff; 
-    border: 1px solid #dee2e6; 
-}
-
-.location-info p {
-    margin: 0;
-    color: #6c757d; 
-}
-
-h1{
-    padding-top:5px;
-    color: #023047;
-}
-
-map-container{
-    height:100px;
-    width:150px;
+    height: 400px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .selected-trip-overlay {
     position: absolute;
-    top: 200px; 
+    top: 20px;
     right: 10px;
-    transform: translateX(-50%);
     z-index: 10;
     width: 80%;
-    max-width: 400px; 
-
-    padding: 10px;
-  
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
     overflow-y: auto;
-    max-height: 80vh; 
+    max-height: 80vh;
 }
 
 .selected-trip-card {
-    border-radius: 8px; 
-    box-shadow: none; 
+    border-radius: 8px;
+    box-shadow: none;
+    margin-bottom: 20px;
 }
 
 .selected-trip-card .location-info p,
 .selected-trip-card .trip-details p {
-    font-size: 17px;
-    margin-bottom: 8px;
+    font-size: 16px;
+    margin-bottom: 10px;
     color: #023047;
 }
 
-.selected-trip-card .trip-details p strong {
+.selected-trip-card .card-title {
+    color: #023047;
     font-weight: bold;
+}
+
+.selected-trip-card .card-subtitle {
+    color: #ff6a18;
+    font-size: 18px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.select-container {
+    margin-bottom: 1.5rem;
+}
+
+select {
+    font-size: 1em;
+    padding: 12px;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    transition: border 0.3s ease;
+}
+
+select:focus {
+    border-color: #ff6a18;
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 106, 24, 0.3);
+}
+
+input[type="date"],
+input[type="time"] {
+    font-size: 1em;
+    padding: 12px;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    transition: border 0.3s ease;
+}
+
+input[type="date"]:focus,
+input[type="time"]:focus {
+    border-color: #ff6a18;
+    box-shadow: 0 0 5px rgba(255, 106, 24, 0.3);
+}
+
+button[type="button"], button[type="submit"] {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    border-radius: 10px;
+    background-color: #ff6a18;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+button[type="button"]:hover,
+button[type="submit"]:hover {
+    background-color: #05202e;
+}
+
+button[type="button"].close {
+    background-color: transparent;
+    color: #ff6a18;
+    font-size: 1.2em;
+}
+
+button[type="button"].close:hover {
     color: #023047;
 }
 
-.selected-trip-card .card-title{
-    color:#023047;
-    font-weight:bold;
+.modal-body {
+    padding: 20px;
 }
 
-.selected-trip-card .card-subtitle{
-    color:#ff6a18;
-    font-size:30px;
+.modal-footer {
+    padding: 10px;
+    justify-content: space-between;
 }
+
+h5 {
+    font-size: 1.25em;
+    color: #023047;
+    margin-bottom: 7px;
+    padding-top: 10px;
+}
+
+h1 {
+    color: #023047;
+}
+
+.card-body {
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.card-body p {
+    color: #6c757d;
+    font-size: 1.1em;
+}
+
+.card-title {
+    color: #ff6a18;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.vehicle-card {
+    border-radius: 10px;
+    margin-bottom: 5px;
+    position: relative;
+
+}
+
+
+ p {
+    border-radius: 10px;
+    margin-bottom: 5px;
+    position: relative;
+    color:black;
+
+}
+
+
+.vehicle-card .status-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: white;
+    border-radius: 12px;
+}
+
+.vehicle-card .status-label.upcoming {
+    background-color: #e74c3c; /* Red for Upcoming */
+}
+
+.vehicle-card .status-label.active {
+    background-color: #f39c12; /* Yellow for Active */
+}
+
+.vehicle-card .status-label.completed {
+    background-color: #2ecc71; /* Green for Completed */
+}
+
+/* Styling for the selected trip card */
+.selected-vehicle-card {
+  position: absolute;
+  top: 10%; /* Adjust this based on where you want it to appear */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 350px; /* Adjust the width based on your design */
+  z-index: 999; /* Ensures the card stays above the map */
+  opacity: 0; /* Start with an invisible card */
+  transition: opacity 0.5s ease-out; /* Smooth fade-in transition */
+}
+
+.selected-vehicle-card.flying-card {
+  animation: flyIn 1s forwards; /* Animation for the flying effect */
+}
+
+@keyframes flyIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(170%) translateY(40%); /* End at the correct position */
+    opacity: 1; /* Make the card visible */
+  }
+}
+
+.scrollable-container {
+  max-height: 640px; /* Set a fixed height for the container */
+  overflow-y: auto;  /* Enable vertical scrolling when content exceeds the height */
+  padding-right: 15px; /* Optional: Adds a little space for the scrollbar */
+}
+
+
+
+.selected-vehicle-card .status-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    border-radius: 12px;
+}
+
+.selected-vehicle-card .status-label.upcoming {
+    background-color: #e74c3c; /* Red for Upcoming */
+}
+
+.selected-vehicle-card .status-label.active {
+    background-color: #f39c12; /* Yellow for Active */
+}
+
+.selected-vehicle-card .status-label.completed {
+    background-color: #2ecc71; /* Green for Completed */
+}
+
+.selected-vehicle-card h5 {
+    font-size: 1.5em;
+    color: #023047;
+    margin-bottom: 15px;
+    padding-top: 10px;
+}
+
+.selected-vehicle-card p {
+    color: #6c757d;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.rental-dates {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #555;
+}
+
