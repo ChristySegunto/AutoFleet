@@ -5,29 +5,25 @@ import { Form, Button, Container, Row, Col, Card, Modal } from 'react-bootstrap'
 import { FaUser, FaPlus } from 'react-icons/fa';
 import './Maptracking.css';
 import { AuthContext } from '../../settings/AuthContext.js';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function Maptracking() {
     const { adminDetails } = useContext(AuthContext);
     const [searchQuery, setSearchQuery] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [rentedVehicles, setRentedVehicles] = useState([]);
-    const [newRentedVehicle, setNewRentedVehicle] = useState({
-        renter_fname: '',
-        renter_lname: '',
-        pickup_date: '',
-        pickup_time: '',
-        dropoff_date: '',
-        dropoff_time: '',
-        car_manufacturer: '',
-        car_model: '',
-        plate_number: '',
-    });
-
-    const [renterIdCounter, setRenterIdCounter] = useState(3); // Start renter_id from 3
-
+    const [selectedVehicle, setSelectedVehicle] = useState(null);
     const mapContainerRef = useRef(null);
-    const mapInstanceRef = useRef(null);
+    
+   // const mapInstanceRef = useRef(null);
+    const [renterList, setRenterList] = useState([]);
+    const [selectedRenter, setSelectedRenter] = useState(null);
+  
+    const [vehicleList, setVehicleList] = useState([]); 
+    const [pickupDate, setPickupDate] = useState("");
+    const [pickupTime, setPickupTime] = useState("");
+    const [dropoffDate, setDropoffDate] = useState("");
+    const [dropoffTime, setDropoffTime] = useState("");
 
 
     // Fetch all rented vehicles from the backend
@@ -84,73 +80,99 @@ function Maptracking() {
         };
         
 
-    }, []);  // Empty dependency array ensures this effect runs once when the component mounts
+    }, []); 
 
 
-    // Add a new rented vehicle
-    const addRentedVehicle = () => {
-        const rentedVehicleData = {
-            renter_fname: newRentedVehicle.renter_fname,
-            renter_lname: newRentedVehicle.renter_lname,
-
-            pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(),
-            pickup_time: newRentedVehicle.pickup_time,
-            dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(),
-            dropoff_time: newRentedVehicle.dropoff_time,
-            car_manufacturer: newRentedVehicle.car_manufacturer,
-            car_model: newRentedVehicle.car_model,
-            plate_number: newRentedVehicle.plate_number,
-            rent_status: "Pending",
-            renter_id: renterIdCounter,
-            vehicle_id: 1, // Replace with actual vehicle ID if needed
-        };
-    
-        // Log the request body to the console to inspect its structure
-        console.log('Request Body:', rentedVehicleData);
-    
-
-        axios.post('http://localhost:5028/api/RentedVehicle/add', rentedVehicleData)
-            .then((response) => {
-                alert("Rented vehicle added successfully!");
-                setRentedVehicles((prev) => [...prev, response.data]);
-                setNewRentedVehicle({
-                    renter_fname: '',
-                    renter_lname: '',
-                    pickup_date: '',
-                    pickup_time: '',
-                    dropoff_date: '',
-                    dropoff_time: '',
-                    car_manufacturer: '',
-                    car_model: '',
-                    plate_number: '',
-                });
-                setShowModal(false);
-                setRenterIdCounter((prevId) => prevId + 1);
-            })
-            .catch((error) => {
-
-                // Log error details for debugging
-                console.error('Error adding rented vehicle:', error.response?.data || error.message);
-                console.log('Error response:', error.response);  // Log the full error response
-                setRenterIdCounter((prevId) => prevId + 1); // Increment renter_id after adding a new vehicle
-            });
-    };
-    
-    
-
-    // Handle input changes in the form
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewRentedVehicle((prevState) => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
 
     // Handle card click to display details of a specific rented vehicle
     const handleCardClick = (vehicle) => {
         setSelectedVehicle(vehicle);
     };
+
+    //ADD TRIP
+      // Fetch renters from API
+  useEffect(() => {
+    axios
+      .get("http://localhost:5028/api/Renter/list")
+      .then((response) => {
+        setRenterList(response.data);
+      })
+      .catch((error) => console.error("Error fetching renters:", error));
+  }, []);
+
+  // Fetch vehicles from API
+  useEffect(() => {
+    axios
+      .get("http://localhost:5028/api/Vehicle/list")
+      .then((response) => {
+        setVehicleList(response.data);
+      })
+      .catch((error) => console.error("Error fetching vehicles:", error));
+  }, []);
+
+  // Handle renter selection
+  const handleSelectRenter = (e) => {
+    const fullName = e.target.value;
+    const renter = renterList.find(
+      (r) => `${r.renter_fname} ${r.renter_lname}` === fullName
+    );
+    setSelectedRenter(renter);
+  };
+
+  // Handle vehicle selection
+  const handleSelectVehicle = (e) => {
+    const vehicleId = parseInt(e.target.value, 10);
+    const vehicle = vehicleList.find((v) => v.vehicle_id === vehicleId);
+    setSelectedVehicle(vehicle);
+  };
+
+  // Function to format date in "YYYY Month - DD" format
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+  }).replace(',', ' -'); // Adjust the format to "YYYY Month - DD"
+};
+
+
+  // Handle form submission
+  const handleSaveTrip = () => {
+    if (!selectedRenter || !selectedVehicle || !pickupDate || !pickupTime || !dropoffDate || !dropoffTime) {
+      alert("Please complete all fields before saving the trip.");
+      return;
+    }
+
+    const tripData = {
+      renter_id: selectedRenter.renter_id, // Only send renter_id
+      vehicle_id: selectedVehicle.vehicle_id, // Only send vehicle_id
+      renter_fname: selectedRenter.renter_fname,
+      renter_lname: selectedRenter.renter_lname,
+      pickup_date: pickupDate,
+      pickup_time: pickupTime,
+      dropoff_date: dropoffDate,
+      dropoff_time: dropoffTime,
+      car_manufacturer: selectedVehicle.car_manufacturer,
+      car_model: selectedVehicle.car_model,
+      plate_number: selectedVehicle.plate_number,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      rent_status: "Upcoming",
+    };
+
+    axios
+      .post("http://localhost:5028/api/RentedVehicle/add", tripData)
+      .then((response) => {
+        alert("Trip saved successfully!");
+        setShowModal(false);
+      })
+      .catch((error) => {
+        console.error("Error saving trip:", error.response?.data || error.message);
+        alert(`Failed to save the trip. Error: ${error.response?.data || error.message}`);
+      });
+  };
 
     return (
         <Container fluid className="Maptracking">
@@ -173,34 +195,47 @@ function Maptracking() {
 
             {/* Main Content Section */}
             <Row className="main-content">
-                <Col md={3}>
-                    <Form.Control
-                        type="text"
-                        placeholder="Search rented vehicles..."
-                        className="mb-3"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <h1>ONGOING RENTALS</h1>
-                    <Button variant="primary" className="mb-3" onClick={() => setShowModal(true)}>
-                        <FaPlus className="me-2" /> Add Rental
-                    </Button>
+            <Col md={3}>
+  <Form.Control
+    type="text"
+    placeholder="Search rented vehicles..."
+    className="mb-3"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+  <h1>ONGOING RENTALS</h1>
+  <Button variant="primary" className="mb-3" onClick={() => setShowModal(true)}>
+    <FaPlus className="me-2" /> Add Rental
+  </Button>
 
-                    {rentedVehicles
-                        .filter((vehicle) =>
-                            vehicle.renter_fname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            vehicle.renter_lname.toLowerCase().includes(searchQuery.toLowerCase())
-                        )
-                        .map((vehicle) => (
-                            <Card key={vehicle.rented_vehicle_id} className="vehicle-card mb-3" onClick={() => handleCardClick(vehicle)}>
-                                <Card.Body>
-                                    <Card.Title>{vehicle.rented_vehicle_id}</Card.Title>
-                                    <p><strong>Pick-up Date:</strong> {vehicle.pickup_date}</p>
-                                    <p><strong>Drop-off Date:</strong> {vehicle.dropoff_date}</p>
-                                </Card.Body>
-                            </Card>
-                        ))}
-                </Col>
+  {/* Scrollable Container for the cards */}
+  <div className="scrollable-container">
+    {rentedVehicles
+      .filter((vehicle) =>
+        (vehicle.renter_fname && vehicle.renter_fname.includes(searchQuery)) ||
+        (vehicle.renter_lname && vehicle.renter_lname.includes(searchQuery))
+      )
+      .map((vehicle) => (
+        <Card key={vehicle.rented_vehicle_id} className="vehicle-card mb-3" onClick={() => handleCardClick(vehicle)}>
+          <Card.Body>
+            <div className="d-flex justify-content-between align-items-center">
+              <p><strong>Rental ID:</strong> {vehicle.rented_vehicle_id}</p>
+              <span className={`status-label ${vehicle.rent_status.toLowerCase()}`}>
+                {vehicle.rent_status}
+              </span>
+            </div>
+            <p><strong>Renter:</strong> {vehicle.renter_fname} {vehicle.renter_lname}</p>
+            <p><strong>Pick-up Date:</strong></p>
+            <p>{formatDate(vehicle.pickup_date)}</p>
+            <p><strong>Drop-off Date:</strong></p>
+            <p>{formatDate(vehicle.dropoff_date)}</p>
+            <p><strong>Car Model:</strong> {vehicle.car_model}</p>
+          </Card.Body>
+        </Card>
+      ))}
+  </div>
+</Col>
+
 
                 <Col md={9}>
 
@@ -208,142 +243,131 @@ function Maptracking() {
 
                     <div ref={mapContainerRef} style={{ width: '100%', height: '800px' }} />
                     {selectedVehicle && (
-                        <Card className="selected-vehicle-card">
-                            <Card.Body>
-                                <Card.Title>Rental Details</Card.Title>
-                                <p><strong>Rental ID:</strong> {selectedVehicle.rented_vehicle_id}</p>
-                                <p><strong>Pick-up Date:</strong> {selectedVehicle.pickup_date}</p>
-                                <p><strong>Drop-off Time:</strong> {selectedVehicle.dropoff_time}</p>
-                                <p><strong>Car:</strong> {selectedVehicle.car_manufacturer} {selectedVehicle.car_model}</p>
-                                <p><strong>Plate Number:</strong> {selectedVehicle.plate_number}</p>
-                                <p><strong>Renter:</strong> {selectedVehicle.renter_fname} {selectedVehicle.renter_lname}</p>
-                            </Card.Body>
-                        </Card>
+                      <Card className="selected-vehicle-card flying-card">
+                        <Card.Body>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <Card.Title>Rental Details</Card.Title>
+                            <span className={`status-label ${selectedVehicle.rent_status}`}>
+                              {selectedVehicle.rent_status}
+                            </span>
+                          </div>
+
+                          {/* Add Pickup and Dropoff Date Below the Title */}
+                          <div className="rental-dates">
+                            <p><strong>Pick-up Date:</strong> {formatDate(selectedVehicle.pickup_date)}</p>
+                            <p><strong>Drop-off Date:</strong> {formatDate(selectedVehicle.dropoff_date)}</p>
+                          </div>
+
+                          <p><strong>Rental ID:</strong> {selectedVehicle.rented_vehicle_id}</p>
+                          <p><strong>Renter:</strong> {selectedVehicle.renter_fname} {selectedVehicle.renter_lname}</p>
+                          <p><strong>Pick-up Time:</strong> {selectedVehicle.pickup_time}</p>
+                          <p><strong>Drop-off Time:</strong> {selectedVehicle.dropoff_time}</p>
+                          <p><strong>Car:</strong> {selectedVehicle.car_manufacturer} {selectedVehicle.car_model}</p>
+                          <p><strong>Plate Number:</strong> {selectedVehicle.plate_number}</p>
+                        </Card.Body>
+                      </Card>
                     )}
+
                 </Col>
             </Row>
 
             {/* Add Rental Modal */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add New Rental</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        {/* Form Inputs */}
-                        <Form.Group className="mb-3">
-                            <Form.Label>Renter First Name</Form.Label>
-                            <Form.Control
-                                name="renter_fname"
-                                value={newRentedVehicle.renter_fname}
-                                onChange={handleInputChange}
-                                placeholder="Enter first name"
-                            />
-                        </Form.Group>
+                <Modal.Title>Add Trip</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* Renter Selection */}
+          <div>
+            <label>Select a Renter:</label>
+            <select onChange={handleSelectRenter} defaultValue="">
+              <option value="" disabled>
+                Select a Renter
+              </option>
+              {renterList.map((renter, index) => (
+                <option key={index} value={`${renter.renter_fname} ${renter.renter_lname}`}>
+                  {`${renter.renter_fname} ${renter.renter_lname}`}
+                </option>
+              ))}
+            </select>
+            {selectedRenter && (
+              <div>
+                <h5>Renter Details:</h5>
+                <p><strong>First Name:</strong> {selectedRenter.renter_fname}</p>
+                <p><strong>Last Name:</strong> {selectedRenter.renter_lname}</p>
+              </div>
+            )}
+          </div>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Renter Last Name</Form.Label>
-                            <Form.Control
-                                name="renter_lname"
-                                value={newRentedVehicle.renter_lname}
-                                onChange={handleInputChange}
-                                placeholder="Enter last name"
-                            />
-                        </Form.Group>
+          {/* Vehicle Selection */}
+          <div style={{ marginTop: "20px" }}>
+            <label>Select a Vehicle:</label>
+            <select onChange={handleSelectVehicle} defaultValue="">
+              <option value="" disabled>
+                Select a Vehicle
+              </option>
+              {vehicleList.map((vehicle) => (
+                <option key={vehicle.vehicle_id} value={vehicle.vehicle_id}>
+                  {vehicle.car_manufacturer} {vehicle.car_model} ({vehicle.plate_number})
+                </option>
+              ))}
+            </select>
+            {selectedVehicle && (
+              <div>
+                <h5>Vehicle Details:</h5>
+                <p><strong>Manufacturer:</strong> {selectedVehicle.car_manufacturer}</p>
+                <p><strong>Model:</strong> {selectedVehicle.car_model}</p>
+                <p><strong>Plate Number:</strong> {selectedVehicle.plate_number}</p>
+              </div>
+            )}
+          </div>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Pick-up Date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                name="pickup_date"
-                                value={newRentedVehicle.pickup_date}
-                                onChange={handleInputChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Pick-up Time</Form.Label>
-                            <Form.Control
-                                type="time"
-                                name="pickup_time"
-                                value={newRentedVehicle.pickup_time}
-                                onChange={handleInputChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Drop-off Date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                name="dropoff_date"
-                                value={newRentedVehicle.dropoff_date}
-                                onChange={handleInputChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Drop-off Time</Form.Label>
-                            <Form.Control
-                                type="time"
-                                name="dropoff_time"
-                                value={newRentedVehicle.dropoff_time}
-                                onChange={handleInputChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Car Manufacturer</Form.Label>
-                            <Form.Control
-                                name="car_manufacturer"
-                                value={newRentedVehicle.car_manufacturer}
-                                onChange={handleInputChange}
-                                placeholder="Enter car manufacturer"
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Car Model</Form.Label>
-                            <Form.Control
-                                name="car_model"
-                                value={newRentedVehicle.car_model}
-                                onChange={handleInputChange}
-                                placeholder="Enter car model"
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Plate Number</Form.Label>
-                            <Form.Control
-                                name="plate_number"
-                                value={newRentedVehicle.plate_number}
-                                onChange={handleInputChange}
-                                placeholder="Enter plate number"
-                            />
-                        </Form.Group>
-{/* 
-//                         {Object.keys(newRentedVehicle).map((field) => (
-//                             <Form.Group className="mb-3" key={field}>
-//                                 <Form.Label>{field.replace('_', ' ')}</Form.Label>
-//                                 <Form.Control
-//                                     name={field}
-//                                     value={newRentedVehicle[field]}
-//                                     onChange={handleInputChange}
-//                                     placeholder={`Enter ${field.replace('_', ' ')}`}
-//                                 />
-//                             </Form.Group>
-//                         ))} */}
-
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Close
-                    </Button>
-                    <Button variant="primary" onClick={addRentedVehicle}>
-                        Add Rental
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+          {/* Trip Details */}
+          <div style={{ marginTop: "20px" }}>
+            <h5>Trip Details</h5>
+            <div>
+              <label>Pickup Date:</label>
+              <input
+                type="date"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>Pickup Time:</label>
+              <input
+                type="time"
+                value={pickupTime}
+                onChange={(e) => setPickupTime(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>Dropoff Date:</label>
+              <input
+                type="date"
+                value={dropoffDate}
+                onChange={(e) => setDropoffDate(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>Dropoff Time:</label>
+              <input
+                type="time"
+                value={dropoffTime}
+                onChange={(e) => setDropoffTime(e.target.value)}
+              />
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSaveTrip}>
+            Save Trip
+          </Button>
+        </Modal.Footer>
+      </Modal>
         </Container>
     );
 }
