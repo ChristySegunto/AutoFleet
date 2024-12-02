@@ -191,7 +191,7 @@ const formatDate = (dateStr) => {
                 </Col>
             </Row>
 
-            <hr className="divider" />
+
 
             {/* Main Content Section */}
             <Row className="main-content">
