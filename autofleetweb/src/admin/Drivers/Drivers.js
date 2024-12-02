@@ -6,10 +6,8 @@ import './Drivers.css';
 import { AuthContext } from './../../settings/AuthContext.js';
 import { FaBell, FaSearch, FaUser } from 'react-icons/fa';
 
-import nationalid from './../../img/national-id-1.jpg'
-
 const Drivers = () => {
-  const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
+  const { user, adminDetails, setAdminDetails } = useContext(AuthContext);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
@@ -36,41 +34,17 @@ const Drivers = () => {
   const [errors, setErrors] = useState({});  
   const [emailTouched, setEmailTouched] = useState(false);
 
-
   useEffect(() => {
+    fetchRenterList();
+  }, []);
+
+  const fetchRenterList = () => {
     axios.get('http://localhost:5028/api/Renter/list') 
       .then(response => {
         setRenterList(response.data);
       })
       .catch(error => {
         console.error("Error fetching renter list:", error);
-      });
-  }, []);
-
-  const handleSave = () => {
-  const newRenter = {
-    renter_fname: renterFname,
-    renter_mname: renterMname,
-    renter_lname: renterLname,
-    renter_birthday: renterBirthday,
-    renter_contact_num: renterContactNumber,
-    renter_email: renterEmail,
-    renter_emergency_contact: renterEmergencyContact,
-    renter_address: renterAddress,
-    renter_id_photo_1: renterIdPhoto,
-    user_id: adminDetails?.adminId
-  };
-
-  console.log("New Renter Data:", newRenter);
-
-
-    axios.post('http://localhost:5028/api/Renter/addRenter', newRenter)
-      .then(response => {
-        alert("Renter added successfully!");
-      })
-      .catch(error => {
-        console.error("Error adding renter:", error);
-        alert(`Failed to add renter: ${error.response?.data || error.message}`);
       });
   };
 
@@ -82,21 +56,6 @@ const Drivers = () => {
     }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!email) {
-      newErrors.email = 'Email is required';
-    }
-    return newErrors;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setShowCreateAccount(false);
-    setShowAccountModal(true);
-    setEmail('');
-  };
-
   const handleSubmitAccount = (e) => {
     e.preventDefault();
     
@@ -106,7 +65,6 @@ const Drivers = () => {
       return;
     }
 
-    console.log('Account creation data:', formData);
     const newRenter = {
       renter_fname: renterFname,
       renter_mname: renterMname,
@@ -118,34 +76,66 @@ const Drivers = () => {
       renter_address: renterAddress,
       renter_id_photo_1: renterIdPhoto,
       user_id: adminDetails?.adminId,
-      password: formData.password // Include password for account creation
+      password: formData.password
     };
 
-    // Combine renter details and account creation
+    // Prepare a temporary ID for immediate rendering
+    const tempId = Date.now();
+    const tempRenter = { ...newRenter, id: tempId };
+
+    // Optimistically add the renter to the list
+    const updatedRenterList = [...renterList, tempRenter];
+    setRenterList(updatedRenterList);
+
     axios.post('http://localhost:5028/api/Renter/addRenter', newRenter)
       .then(response => {
+        // Replace the temporary renter with the actual response from server
+        const actualRenter = response.data;
+        setRenterList(prevList => 
+          prevList.map(renter => 
+            renter.id === tempId ? actualRenter : renter
+          )
+        );
+        
         alert("Renter and account added successfully!");
         setShowAccountModal(false);
+        
         // Reset form data
-        setRenterFname("");
-        setRenterMname("");
-        setRenterLname("");
-        setRenterBirthday("");
-        setRenterContactNumber("");
-        setRenterEmail("");
-        setRenterEmergencyContact("");
-        setRenterAddress("");
-        setRenterIdPhoto("");
-        setFormData({
-          email: '',
-          password: '',
-          confirmPassword: ''
-        });
+        resetFormFields();
       })
       .catch(error => {
+        // If API fails, remove the temporary renter
+        setRenterList(prevList => 
+          prevList.filter(renter => renter.id !== tempId)
+        );
+        
         console.error("Error adding renter:", error);
         alert(`Failed to add renter: ${error.response?.data || error.message}`);
       });
+  };
+
+  const resetFormFields = () => {
+    setRenterFname("");
+    setRenterMname("");
+    setRenterLname("");
+    setRenterBirthday("");
+    setRenterContactNumber("");
+    setRenterEmail("");
+    setRenterEmergencyContact("");
+    setRenterAddress("");
+    setRenterIdPhoto("");
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowCreateAccount(false);
+    setShowAccountModal(true);
+    setEmail('');
   };
 
   const filteredDrivers = renterList.filter(driver =>
