@@ -109,21 +109,6 @@ function Maptracking() {
         console.log('Request Body:', rentedVehicleData);
     
 
-            pickup_date: new Date(newRentedVehicle.pickup_date).toISOString(), // Convert to ISO string
-            pickup_time: newRentedVehicle.pickup_time, // Ensure it's in TimeSpan format
-            dropoff_date: new Date(newRentedVehicle.dropoff_date).toISOString(), // Convert to ISO string
-            dropoff_time: newRentedVehicle.dropoff_time, // Ensure it's in TimeSpan format
-            car_manufacturer: newRentedVehicle.car_manufacturer,
-            car_model: newRentedVehicle.car_model,
-            plate_number: newRentedVehicle.plate_number,
-            rent_status: "Pending", // Default status
-            renter_id: renterIdCounter,
-            vehicle_id: 1, // Replace with actual vehicle ID
-        };
-
-        console.log('Request Body:', rentedVehicleData); // Add this line to check the sent data
-
-
         axios.post('http://localhost:5028/api/RentedVehicle/add', rentedVehicleData)
             .then((response) => {
                 alert("Rented vehicle added successfully!");
@@ -335,7 +320,7 @@ function Maptracking() {
                                 placeholder="Enter plate number"
                             />
                         </Form.Group>
-
+{/* 
 //                         {Object.keys(newRentedVehicle).map((field) => (
 //                             <Form.Group className="mb-3" key={field}>
 //                                 <Form.Label>{field.replace('_', ' ')}</Form.Label>
@@ -346,7 +331,7 @@ function Maptracking() {
 //                                     placeholder={`Enter ${field.replace('_', ' ')}`}
 //                                 />
 //                             </Form.Group>
-//                         ))}
+//                         ))} */}
 
                     </Form>
                 </Modal.Body>
