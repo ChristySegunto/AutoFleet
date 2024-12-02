@@ -38,7 +38,7 @@ const Drivers = () => {
 
 
   useEffect(() => {
-    axios.get('http://localhost:5028/api/Renter/list') // Adjust the URL as needed
+    axios.get('http://localhost:5028/api/Renter/list') 
       .then(response => {
         setRenterList(response.data);
       })
@@ -63,7 +63,7 @@ const Drivers = () => {
 
   console.log("New Renter Data:", newRenter);
 
- // Send POST request to your backend
+
     axios.post('http://localhost:5028/api/Renter/addRenter', newRenter)
       .then(response => {
         alert("Renter added successfully!");
@@ -99,13 +99,53 @@ const Drivers = () => {
 
   const handleSubmitAccount = (e) => {
     e.preventDefault();
+    
+    // Validate password match
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
     console.log('Account creation data:', formData);
-    setShowAccountModal(false);
-    setFormData({
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
+    const newRenter = {
+      renter_fname: renterFname,
+      renter_mname: renterMname,
+      renter_lname: renterLname,
+      renter_birthday: renterBirthday,
+      renter_contact_num: renterContactNumber,
+      renter_email: renterEmail,
+      renter_emergency_contact: renterEmergencyContact,
+      renter_address: renterAddress,
+      renter_id_photo_1: renterIdPhoto,
+      user_id: adminDetails?.adminId,
+      password: formData.password // Include password for account creation
+    };
+
+    // Combine renter details and account creation
+    axios.post('http://localhost:5028/api/Renter/addRenter', newRenter)
+      .then(response => {
+        alert("Renter and account added successfully!");
+        setShowAccountModal(false);
+        // Reset form data
+        setRenterFname("");
+        setRenterMname("");
+        setRenterLname("");
+        setRenterBirthday("");
+        setRenterContactNumber("");
+        setRenterEmail("");
+        setRenterEmergencyContact("");
+        setRenterAddress("");
+        setRenterIdPhoto("");
+        setFormData({
+          email: '',
+          password: '',
+          confirmPassword: ''
+        });
+      })
+      .catch(error => {
+        console.error("Error adding renter:", error);
+        alert(`Failed to add renter: ${error.response?.data || error.message}`);
+      });
   };
 
   const filteredDrivers = renterList.filter(driver =>
@@ -114,7 +154,7 @@ const Drivers = () => {
     driver.renter_lname.toLowerCase().includes(searchQuery.toLowerCase())  ||
     driver.renter_email.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
+  
   return (
     <div className="drivers-container">
       {/* Header */}
@@ -152,12 +192,12 @@ const Drivers = () => {
             </div>
 
             <div className="add-schedule-container">
-              <button 
-                className="add-schedule-btn" 
-                onClick={() => setShowAddVehicleModal(true)}
-              >
-                Add Renter
-              </button>
+            <button 
+            className="add-schedule-btn" 
+            onClick={() => setShowCreateAccount(true)} 
+          >
+            Add Renter
+          </button>
             </div>
 
             <div className="drivers-grid">
@@ -227,19 +267,102 @@ const Drivers = () => {
         </div>
       </main>
 
-      {/* Add Vehicle Modal */}
-      <Modal
-        show={showAddVehicleModal}
-        onHide={() => setShowAddVehicleModal(false)}
-        size="lg"
-        dialogClassName="custom-modal"
+     {/* Verify Email Modal */}
+<Modal
+  show={showCreateAccount}
+  onHide={() => setShowCreateAccount(false)}
+  size="md"
+  centered
+  className="simple-account-modal"
+>
+  <Modal.Header closeButton>
+    <Modal.Title
+      className="w-100"
+      style={{
+        color: '#f76d20',
+        fontSize: '24px',
+        fontWeight: 'bold',
+      }}
+    >
+      INPUT YOUR EMAIL ADDRESS
+    </Modal.Title>
+  </Modal.Header>
+  <Modal.Body className="px-4 py-3">
+    <Form noValidate>
+      <Form.Group className="mb-4">
+        <Form.Label style={{ color: '#000', marginBottom: '8px' }}>Email</Form.Label>
+        <Form.Control
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter email"
+          style={{
+            border: 'none',
+            borderBottom: '1px solid #ced4da',
+            borderRadius: '0',
+            padding: '8px 0',
+            boxShadow: 'none',
+          }}
+          isInvalid={!email && emailTouched}
+        />
+        <Form.Control.Feedback type="invalid">
+          Email is required.
+        </Form.Control.Feedback>
+      </Form.Group>
+
+      <div className="d-flex flex-column align-items-center">
+      <Button
+        className="w-100 mb-3"
+        variant="dark"
+        style={{
+          backgroundColor: '#003399',
+          border: 'none',
+          borderRadius: '4px',
+          padding: '10px',
+        }}
+        onClick={() => {
+          if (!email) {
+            setEmailTouched(true); 
+            return; 
+          }
+          setShowCreateAccount(false);
+          setShowAddVehicleModal(true); 
+        }}
       >
-        <Modal.Header closeButton>
-          <Modal.Title className="text w-100" style={{ fontWeight: 'bold', color: '#f76d20' }}>
-            ADD RENTER
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+        Verify
+      </Button>
+
+      <span
+        style={{
+          color: '#003399',
+          textDecoration: 'underline',
+          cursor: 'pointer',
+        }}
+        onClick={() => {
+          setShowCreateAccount(false);
+          setShowAddVehicleModal(true); 
+        }}
+      >
+        Create an account
+      </span>
+      </div>
+    </Form>
+  </Modal.Body>
+</Modal>
+
+        {/* Personal Details Modal */}
+        <Modal
+          show={showAddVehicleModal}
+          onHide={() => setShowAddVehicleModal(false)}
+          size="lg"
+          dialogClassName="custom-modal"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title className="text w-100" style={{ fontWeight: 'bold', color: '#f76d20' }}>
+              ADD RENTER
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
           {/* Renter Details */}
           <h6 style={{ color: '#003399', fontWeight: 'bold', marginBottom: '10px' }}>RENTER DETAILS</h6>
           <Form>
@@ -348,117 +471,29 @@ const Drivers = () => {
             </div>
           </Form>
       
-        </Modal.Body>
+          </Modal.Body>
         <Modal.Footer className="justify-content-center">
-
-        <Button className='modal-renter-save' onClick={handleSave}> 
-            Save Changes 
-          </Button>
-        {/* PANSAMANTALA MUNA NA DITO MUNA TO DI PA TAPOS YUNG SA EMAIL NA MAY BACKEND*/}
-
+                      
           <Button
-            variant="primary"
-            style={{
-              backgroundColor: '#003399',
-              borderColor: '#003399',
-              padding: '5px 15px',
-            }}
-            onClick={() => {
-              setShowAddVehicleModal(false);
-              setShowCreateAccount(true);
-            }}
-          >
-            Next
-          </Button>
+          variant="primary"
+          style={{
+            backgroundColor: '#003399',
+            borderColor: '#003399',
+            padding: '5px 15px',
+          }}
+          onClick={() => {
+            setShowAddVehicleModal(false);
+            setShowAccountModal(true); 
+          }}
+        >
+          Next
+        </Button>
         </Modal.Footer>
       </Modal>
 
-     {/* Simple Create Account Modal */}
-<Modal
-  show={showCreateAccount}
-  onHide={() => setShowCreateAccount(false)}
-  size="md"
-  centered
-  className="simple-account-modal"
->
-  <Modal.Header closeButton>
-    <Modal.Title
-      className="w-100"
-      style={{
-        color: '#f76d20',
-        fontSize: '24px',
-        fontWeight: 'bold',
-      }}
-    >
-      INPUT YOUR EMAIL ADDRESS
-    </Modal.Title>
-  </Modal.Header>
-  <Modal.Body className="px-4 py-3">
-    <Form noValidate>
-      <Form.Group className="mb-4">
-        <Form.Label style={{ color: '#000', marginBottom: '8px' }}>Email</Form.Label>
-        <Form.Control
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter email"
-          style={{
-            border: 'none',
-            borderBottom: '1px solid #ced4da',
-            borderRadius: '0',
-            padding: '8px 0',
-            boxShadow: 'none',
-          }}
-          isInvalid={!email && emailTouched} // Mark invalid if touched and empty
-        />
-        <Form.Control.Feedback type="invalid">
-          Email is required.
-        </Form.Control.Feedback>
-      </Form.Group>
 
-      <div className="d-flex flex-column align-items-center">
-        <Button
-          className="w-100 mb-3"
-          variant="dark"
-          style={{
-            backgroundColor: '#003399',
-            border: 'none',
-            borderRadius: '4px',
-            padding: '10px',
-          }}
-          onClick={() => {
-            if (!email) {
-              setEmailTouched(true); 
-              return; 
-            }
-            setShowCreateAccount(false);
-          }}
-        >
-          Submit
-        </Button>
-
-        <span
-          style={{
-            color: '#003399',
-            textDecoration: 'underline',
-            cursor: 'pointer',
-          }}
-          onClick={() => {
-            setShowCreateAccount(false);
-            setShowAccountModal(true);
-          }}
-        >
-          Create an account
-        </span>
-      </div>
-    </Form>
-  </Modal.Body>
-</Modal>
-
-
-
-       {/* Create Renter Account Modal */}
-       <Modal
+       {/* Email and Password Creation Modal */}
+      <Modal
         show={showAccountModal}
         onHide={() => setShowAccountModal(false)}
         size="md"
@@ -472,17 +507,14 @@ const Drivers = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmitAccount}>
-            <Form.Group className="mb-4">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                placeholder="Enter email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
+          <Form.Group className="mb-4">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            value={renterEmail}  
+            readOnly      
+          />
+        </Form.Group>
 
             <Form.Group className="mb-4">
               <Form.Label>Password</Form.Label>
@@ -510,15 +542,17 @@ const Drivers = () => {
 
             <div className="d-flex justify-content-center">
               <Button
-                type="submit"
+                variant="primary"
                 style={{
                   backgroundColor: '#003399',
                   borderColor: '#003399',
-                  padding: '8px 40px',width: '100%',
+                  padding: '8px 40px',
+                  width: '100%',
                   maxWidth: '200px',
                   borderRadius: '5px',
                   fontWeight: 'bold'
                 }}
+                onClick={handleSubmitAccount}
               >
                 Submit
               </Button>
