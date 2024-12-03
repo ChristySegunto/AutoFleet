@@ -280,6 +280,8 @@
   
   /* Driver Details */
   .driver-details {
+    max-height: 90vh;
+    overflow-y: auto;
     width: 65%;
     min-width: 600px;
   }
@@ -385,4 +387,29 @@ h6 {
   text-transform: uppercase;
 }
 
+.drivers-container .recent-trips {
+  margin-top: 10px;
+  border-top: .5px solid #fff;
+}
 
+.drivers-container .recent-trips h5{
+  color: #fff;
+}
+
+.drivers-container .recent-trips-box {
+  background-color: #ffffffe4;
+  color: #05202e;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.no-recent-trips{
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}
+
+.custom-dateform{
+  height: 35px;
+}
