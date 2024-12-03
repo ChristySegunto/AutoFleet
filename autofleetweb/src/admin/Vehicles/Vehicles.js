@@ -426,6 +426,7 @@ const Vehicles = () => {
                           <option value="Diesel">Diesel</option>
                           <option value="Gasoline">Gasoline</option>
                           <option value="Electric">Electric</option>
+                          <option value="Hybrid">Hybrid</option>
                         </Form.Select>
                         {errors.fuel_type && <Form.Text className="text-danger">{errors.fuel_type}</Form.Text>}
                       </Form.Group>
@@ -441,6 +442,8 @@ const Vehicles = () => {
                           {!selectedVehicle?.transmission_type && <option value="">Select Transmission Type</option>}
                           <option value="Manual">Manual</option>
                           <option value="Automatic">Automatic</option>
+                          <option value="Dual-clutch">Dual-clutch</option>
+                          <option value="CVT">CVT</option>
                         </Form.Select>
                         {errors.transmission_type && <Form.Text className="text-danger">{errors.transmission_type}</Form.Text>}
                       </Form.Group>
@@ -484,6 +487,11 @@ const Vehicles = () => {
                           {!selectedVehicle?.vehicle_category && <option value="">Select Category</option>}
                           <option value="Sedan">Sedan</option>
                           <option value="SUV">SUV</option>
+                          <option value="Van">Van</option>
+                          <option value="Minivan">Minivan</option>
+                          <option value="Coupe">Coupe</option>
+                          <option value="Pickup">Pickup</option>
+                          <option value="Jeep">Jeep</option>
                         </Form.Select>
                         {errors.vehicle_category && <Form.Text className="text-danger">{errors.vehicle_category}</Form.Text>}
                       </Form.Group>
