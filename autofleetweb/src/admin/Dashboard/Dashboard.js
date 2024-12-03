@@ -13,12 +13,13 @@ import { AuthContext } from './../../settings/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
 import * as signalR from "@microsoft/signalr";
 import NotificationManager from './../Notif/NotificationManager';
+import ReactMapGL, { Marker } from 'react-map-gl';
 
 
 ChartJS.register(ArcElement, Tooltip, Legend); 
 
 
-
+const MAPBOX_API_KEY = "pk.eyJ1Ijoicm9jaGVsbGVib3JyIiwiYSI6ImNtM29rejZnazA0Z3Mya3NkZ2g4YXd5cnIifQ.4Pso-euXHqkZMUmz7Dpegw";
 function Dashboard() {
   const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
   const { notifications, unreadCount, markAsRead } = NotificationManager();
@@ -42,6 +43,34 @@ function Dashboard() {
   const [todaySched, setTodaySched] = useState([]);
   // const { notifications, markNotificationAsRead } = useNotifications();
 
+  const [carUpdates, setCarUpdates] = useState([]);
+
+  const [viewport, setViewport] = useState({
+    latitude: 14.5995,  // Center of the map (adjust to your desired location)
+    longitude: 120.9842,
+    zoom: 10,  // Default zoom level
+  });
+
+  useEffect(() => {
+    const fetchCarUpdates = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5028/api/Dashboard/get-car-updates'); // Replace with actual API endpoint
+        if (response.ok) {
+          const data = await response.json();
+          setCarUpdates(data);
+        } else {
+          setError('Failed to fetch car updates.');
+        }
+      } catch (error) {
+        setError('Error fetching car updates: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCarUpdates();
+  }, []);
 
   const fleetstatusdata = {
     labels: ['SUV', 'Van', 'Sedan'],
@@ -294,16 +323,22 @@ function Dashboard() {
 
             <Row className='location-overview'>
               <h4>LOCATION OVERVIEW</h4>
-              <div className='location-overview-custom'>
-                <iframe
-                  title="Google Map"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d128041.0482820389!2d120.9842!3d14.5995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33b5b594b0e626c7%3A0xa2c5ebd24e07a68!2zTW5pbGFwYXIsIFBILjAgMDE0MCA3NCcgU0lYJZ2Fv!5e0!3m2!1sen!2sph!4v1642125664995!5m2!1sen!2sph"
+              <div className="map-container">
+                <ReactMapGL
+                  {...viewport}
                   width="100%"
-                  height="100%" 
-                  style={{ border: 0 }}
-                  allowFullScreen=""
-                  loading="lazy"
-                ></iframe>
+                  height="100px"
+                  mapboxApiAccessToken={MAPBOX_API_KEY}
+                  onViewportChange={(nextViewport) => setViewport(nextViewport)}
+                >
+                  {carUpdates.map((car, index) => (
+                    <Marker key={index} latitude={car.latitude} longitude={car.longitude}>
+                      <div className="marker">
+                        <span>{car.status}</span>
+                      </div>
+                    </Marker>
+                  ))}
+                </ReactMapGL>
               </div>
               
             </Row>
