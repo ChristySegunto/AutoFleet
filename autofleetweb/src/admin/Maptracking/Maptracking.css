@@ -1,7 +1,9 @@
 
 .Maptracking {
     padding: 20px;
-    background-color: #fffaf7;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .Maptracking .map-header {
@@ -83,7 +85,7 @@
 .selected-trip-overlay {
     position: absolute;
     top: 20px;
-    right: 10px;
+    left: 50px;
     z-index: 10;
     width: 80%;
     max-width: 400px;
@@ -264,8 +266,8 @@ h1 {
 /* Styling for the selected trip card */
 .selected-vehicle-card {
   position: absolute;
-  top: 10%; /* Adjust this based on where you want it to appear */
-  left: 50%;
+  top: 5%; /* Adjust this based on where you want it to appear */
+  /* left: 10%; */
   transform: translateX(-50%);
   width: 350px; /* Adjust the width based on your design */
   z-index: 999; /* Ensures the card stays above the map */
@@ -337,3 +339,35 @@ h1 {
   color: #555;
 }
 
+.map-container {
+    position: relative;
+    height: 800px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mapboxgl-popup{
+top: -40px !important;
+}
+
+.mapboxgl-popup-tip {
+    display: none !important;
+}
+
+.mapboxgl-popup-close-button {
+    background-color: transparent !important; /* Remove background */
+    border: none; /* Remove border */
+    padding: 10px !important; /* Adjust padding */
+    color: red !important; /* Change icon color */
+    font-size: 18px !important; /* Adjust size */
+    cursor: pointer !important; /* Change cursor to pointer */
+    transition: background-color 0.3s !important; /* Add transition effect */
+
+}
+
+.mapboxgl-popup-close-button:hover {
+    background-color: rgba(0, 0, 0, 0.2); /* Add background on hover */
+    color: white; /* Change icon color on hover */
+}
