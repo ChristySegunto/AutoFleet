@@ -1,5 +1,5 @@
-import { Form, Button, Modal, Row, Col, Tabs, Tab, Alert } from 'react-bootstrap';
-import { FaBell, FaSearch, FaUser, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { Form, Button, Modal, Row, Col, Tabs, Tab } from 'react-bootstrap';
+import { FaUser, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import React, { useContext, useState, useEffect } from 'react';
 import axios from 'axios';  // To make HTTP requests
 import { AuthContext } from './../../settings/AuthContext.js';
@@ -55,12 +55,8 @@ const Vehicles = () => {
       created_at: vehicle.created_at ? new Date(vehicle.created_at).toISOString().slice(0, 10) : '',
       updated_at: vehicle.updated_at ? new Date(vehicle.updated_at).toISOString().slice(0, 10) : '',
     };
-  
-    // Log the vehicle and the formatted dates for debugging
+
     console.log("Selected Vehicle:", formattedVehicle);
-    console.log("Formatted created_at:", formattedVehicle.created_at);
-    console.log("Formatted updated_at:", formattedVehicle.updated_at);
-  
     setSelectedVehicle(formattedVehicle);
     setModalMode('view');
     setShowModal(true);
@@ -90,6 +86,31 @@ const Vehicles = () => {
       });
   };
 
+  const handleStatusChange = (vehicleId, newStatus) => {
+    axios.put(
+      `http://localhost:5028/api/Vehicle/${vehicleId}/status`, 
+      JSON.stringify(newStatus), // Convert to JSON string
+      {
+        headers: {
+          'Content-Type': 'application/json' // Explicitly set the content type
+        }
+      }
+    )
+      .then(() => {
+        setVehicles(prevVehicles => 
+          prevVehicles.map(vehicle => 
+            vehicle.vehicle_id === vehicleId 
+              ? { ...vehicle, vehicle_status: newStatus, updated_at: new Date().toISOString().slice(0, 10) }
+              : vehicle
+          )
+        );
+      })
+      .catch(error => {
+        console.error("Error updating status:", error.response ? error.response.data : error.message);
+        alert("Failed to update status.");
+      });
+  };
+
   const validateForm = () => {
     const newErrors = {};
     if (!selectedVehicle?.plate_number) newErrors.plate_number = "Plate number is required.";
@@ -106,23 +127,50 @@ const Vehicles = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const getCurrentDateInLocalFormat = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    
+    // If the date is already in YYYY-MM-DD format, return it
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+    
+    // Create a new Date object
+    const d = new Date(date);
+    
+    // Ensure we're getting the local date without timezone shifts
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  };
   
   const handleSave = () => {
-    if (!validateForm()) return; // If validation fails, do not proceed
+    if (!validateForm()) return;
   
-    // Ensure that created_at and updated_at are initialized if they are undefined
     const formatDate = (date) => {
-      const d = new Date(date || new Date());
-      d.setHours(0, 0, 0, 0); // Set time to 00:00:00
-      return d.toISOString().split('T')[0]; // Get only the date part (YYYY-MM-DD)
+      // If no date is provided, use the original date or current date
+      const effectiveDate = date || 
+        (modalMode === 'edit' ? selectedVehicle.created_at : new Date());
+      
+      // Parse the date, ensuring it's treated in the local timezone
+      const d = new Date(effectiveDate);
+      
+      // Format to YYYY-MM-DD in local time
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
     };
-  
-    const created_at = formatDate(selectedVehicle.created_at);
-    const updated_at = formatDate(selectedVehicle.updated_at);
-  
-    // Log the formatted dates for debugging
-    console.log("Formatted created_at:", created_at);
-    console.log("Formatted updated_at:", updated_at);
   
     const newVehicle = {
       plate_number: selectedVehicle.plate_number,
@@ -138,30 +186,42 @@ const Vehicles = () => {
       total_fuel_consumption: selectedVehicle.total_fuel_consumption,
       distance_traveled: selectedVehicle.distance_traveled,
       vehicle_status: selectedVehicle.vehicle_status,
-      created_at: created_at, // Date without time
-      updated_at: updated_at, // Date without time
+      created_at: formatDate(selectedVehicle.created_at),
+      updated_at: formatDate(selectedVehicle.updated_at || new Date()),
     };
-  
-    // If we are updating an existing vehicle, include vehicle_id
+
     const request = selectedVehicle.vehicle_id
       ? axios.put(`http://localhost:5028/api/Vehicle/${selectedVehicle.vehicle_id}`, newVehicle)
       : axios.post("http://localhost:5028/api/Vehicle", newVehicle);
-  
-    request
+
+      request
       .then(response => {
-        alert("Vehicle saved successfully!");
+        // Use more descriptive success message
+        console.log(`Vehicle ${selectedVehicle.vehicle_id ? 'updated' : 'added'} successfully!`);
         setShowModal(false);
+        
+        // More robust state update
         setVehicles(prevList => {
           if (selectedVehicle.vehicle_id) {
-            return prevList.map(v => v.vehicle_id === selectedVehicle.vehicle_id ? response.data : v);
+            return prevList.map(v => 
+              v.vehicle_id === selectedVehicle.vehicle_id 
+                ? { ...response.data, created_at: formatDate(response.data.created_at) }
+                : v
+            );
           } else {
-            return [...prevList, response.data];
+            return [...prevList, { ...response.data, created_at: formatDate(response.data.created_at) }];
           }
         });
       })
       .catch(error => {
+        // More detailed error handling
+        const errorMessage = error.response?.data?.message 
+          || error.response?.data 
+          || error.message 
+          || 'An unexpected error occurred';
+        
+        console.error(`Failed to save vehicle: ${errorMessage}`);
         console.error("Error saving vehicle:", error);
-        alert(`Failed to save vehicle: ${error.response?.data || error.message}`);
       });
   };
   
@@ -186,7 +246,6 @@ const Vehicles = () => {
       <div className="header-row">
         <h3 className="list-header">LIST OF VEHICLES</h3>
         <div className="action-buttons">
-          <button className="export-btn">EXPORT</button>
           <Button className='add-vehicle-btn' onClick={handleShow}>
             ADD VEHICLE
           </Button>
@@ -206,40 +265,62 @@ const Vehicles = () => {
           </thead>
           <tbody>
             {vehicles.map((vehicle, index) => (
-              <tr
-                key={index}
-                onClick={() => handleRowClick(vehicle)}
-                className="vehicle-row"
-              >
-                <td>{vehicle.vehicle_id}</td>
-                <td>{vehicle.plate_number}</td>
-                <td>{vehicle.car_model}</td>
-                <td>
-                  <span className={`status ${vehicle.vehicle_status.toLowerCase()}`}>
-                    {vehicle.vehicle_status}
-                  </span>
-                </td>
-                <td className="actions-icons">
-                  <Button className="action-btn" onClick={(e) => {
-                    e.stopPropagation();
-                    handleEdit(vehicle);
-                  }}>
-                    <FaEdit />
-                  </Button>
-                  <Button className="action-btn" onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove(vehicle);
-                  }}>
-                    <FaTrash />
-                  </Button>
-                  <Button className="action-btn" onClick={(e) => {
-                    e.stopPropagation();
-                    handleRowClick(vehicle); // This will open the vehicle details in view mode
-                  }}>
-                    <FaEye />
-                  </Button>
-                </td>
-              </tr>
+            <tr
+              key={index}
+              onClick={(e) => {
+                // Check if the click target is not in the 'text-center' or 'actions-icons' columns
+                const clickedInsideActions = e.target.closest('.text-center, .actions-icons');
+                
+                // If clicked outside the status dropdown or action buttons, trigger the row click
+                if (!clickedInsideActions) {
+                  handleRowClick(vehicle, e);
+                }
+              }}
+              className="vehicle-row"
+            >
+              <td>{vehicle.vehicle_id}</td>
+              <td>{vehicle.plate_number}</td>
+              <td>{vehicle.car_model}</td>
+              <td className="text-center">
+                <Form.Control
+                  as="select"
+                  value={vehicle.vehicle_status}
+                  onChange={(e) => {
+                    e.stopPropagation(); // Stop the click event from propagating to the row click handler
+                    handleStatusChange(vehicle.vehicle_id, e.target.value);
+                  }}
+                  className={`status-${vehicle.vehicle_status.toLowerCase().replace(' ', '-')}`}
+                >
+                  {/* Only show "No Status" option if the vehicle doesn't have a status */}
+                  {!vehicle.vehicle_status && <option value="">No Status</option>}
+                  <option value="Available">Available</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rented">Rented</option>
+                  <option value="Under Maintenance">Under Maintenance</option>
+                  <option value="Completed">Completed</option>
+                </Form.Control>
+              </td>
+              <td className="actions-icons">
+                <Button className="action-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit(vehicle);
+                }}>
+                  <FaEdit />
+                </Button>
+                <Button className="action-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(vehicle);
+                }}>
+                  <FaTrash />
+                </Button>
+                <Button className="action-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  handleRowClick(vehicle); // This will open the vehicle details in view mode
+                }}>
+                  <FaEye />
+                </Button>
+              </td>
+            </tr>
             ))}
           </tbody>
         </table>
@@ -322,10 +403,10 @@ const Vehicles = () => {
                             disabled={modalMode === 'view'}
                           >
                             <option value="">Select Status</option>
-                            <option value="Available">Active</option>
+                            <option value="Available">Available</option>
                             <option value="Pending">Pending</option>
                             <option value="Rented">Rented</option>
-                            <option value="On Maintenance">On Maintenance</option>
+                            <option value="Under Maintenance">Under Maintenance</option>
                           </Form.Select>
                           {errors.vehicle_status && <Form.Text className="text-danger">{errors.vehicle_status}</Form.Text>}
                         </Form.Group>
@@ -505,12 +586,11 @@ const Vehicles = () => {
                       <Form.Control 
                         className="modal-vehicle-control" 
                         type="date" 
-                        value={selectedVehicle?.created_at ? new Date(selectedVehicle.created_at).toISOString().slice(0, 10) : ''} // Ensure date is in YYYY-MM-DD format
-                        disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({
-                          ...selectedVehicle, 
-                          created_at: e.target.value // Update selectedVehicle with the new date value
-                        })}
+                        value={modalMode === 'add' 
+                          ? getCurrentDateInLocalFormat() // Modified helper function
+                          : formatDateForInput(selectedVehicle?.created_at)}
+                        disabled
+                        readOnly
                       />
                     </Form.Group>
 
@@ -521,12 +601,9 @@ const Vehicles = () => {
                       <Form.Control 
                         className="modal-vehicle-control" 
                         type="date" 
-                        value={selectedVehicle?.updated_at ? new Date(selectedVehicle.updated_at).toISOString().slice(0, 10) : ''} // Ensure date is in YYYY-MM-DD format
-                        disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({
-                          ...selectedVehicle, 
-                          updated_at: e.target.value // Update selectedVehicle with the new date value
-                        })}
+                        value={formatDateForInput(selectedVehicle?.updated_at)}
+                        disabled
+                        readOnly
                       />
                     </Form.Group>
                   </Row>
