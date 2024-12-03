@@ -139,8 +139,7 @@ const Vehicles = () => {
       const manufactureYear = Number(manufacture_year); // Convert to number
       if (isNaN(manufactureYear) || manufactureYear <= 0 || !Number.isInteger(manufactureYear)) {
         newErrors.manufacture_year = "Year of manufacture must be a positive number."; // Invalid year
-      } else if (manufactureYear < 1880) {
-        newErrors.manufacture_year = "Modern cars were invented in 1885.";  // Year is too old
+
       }
     }
 
