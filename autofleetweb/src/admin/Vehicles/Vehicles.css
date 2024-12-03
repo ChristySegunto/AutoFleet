@@ -273,3 +273,69 @@
 .vehicles-container .modal-vehicle-close {
   border: 0;
 }
+
+
+.vehicles-container .status-pending {
+  color: #CC3C3C;
+  background-color: #FFD9D9;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.vehicles-container .status-pending:hover {
+  color: #d03131;
+  background-color: #ffa9a9;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.vehicles-container .status-rented{
+  color: #ff6a18;
+  background-color: #fbd8c6;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.vehicles-container .status-rented:hover{
+  color: #ff6a18;
+  background-color: #f7bea2;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.vehicles-container .status-under-maintenance {
+  color: #767676;
+  background-color: #E6E6E6;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.vehicles-container .status-under-maintenance:hover {
+  color: #585858;
+  background-color: #bdbcbc;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.vehicles-container .status-available{
+  color: #68B031;
+  background-color: #D1F1B9;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+
+.vehicles-container .status-available:hover{
+  color: #73ab48;
+  background-color: #b5ee8a;
+  border: 0;
+  border-radius: 15px;
+  text-align: center;
+}
