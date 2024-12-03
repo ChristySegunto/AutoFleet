@@ -29,7 +29,8 @@ const Drivers = () => {
   const [renterEmail, setRenterEmail] = useState("");
   const [renterEmergencyContact, setRenterEmergencyContact] = useState("");
   const [renterAddress, setRenterAddress] = useState("");
-  const [renterIdPhoto, setRenterIdPhoto] = useState("");
+  const [recentTrips, setRecentTrips] = useState([]);
+
 
   // Account Creation State
   const [formData, setFormData] = useState({
@@ -44,6 +45,12 @@ const Drivers = () => {
     fetchRenterList();
   }, []);
 
+  useEffect(() => {
+    if (selectedDriver) {
+      fetchRecentTrips(selectedDriver.renter_id);
+    }
+  }, [selectedDriver]);
+
   const fetchRenterList = async () => {
     try {
       const response = await axios.get('http://localhost:5028/api/Renter/list');
@@ -51,6 +58,16 @@ const Drivers = () => {
     } catch (error) {
       console.error("Error fetching renter list:", error);
       alert("Failed to fetch renters");
+    }
+  };
+
+  const fetchRecentTrips = async (renterId) => {
+    try {
+      const response = await axios.get(`http://localhost:5028/api/Home/recent-trips/${renterId}`);
+      setRecentTrips(response.data);
+    } catch (error) {
+      console.error('Error fetching recent trips:', error);
+      alert('Failed to fetch recent trips');
     }
   };
 
@@ -126,13 +143,28 @@ const Drivers = () => {
       renter_email: renterEmail,
       renter_emergency_contact: renterEmergencyContact,
       renter_address: renterAddress,
-      renter_id_photo_1: renterIdPhoto,
-      user_id: adminDetails?.adminId,
-      password: formData.password
+      // renter_id_photo_1: renterIdPhoto,
+      // password: formData.password
     };
 
+    // const formDataToSend = new FormData();
+    // if (renterIdPhoto) {
+    //   formDataToSend.append('renter_id_photo', renterIdPhoto); // Attach file
+    // }
+
+    const newAcc = {
+      email: renterEmail,
+      password: formData.password,
+      role: "renter"
+    }
+
     try {
+      // Create user first
+      const userResponse = await axios.post('http://localhost:5028/api/Renter/addAcc', newAcc);
+
+      newRenter.user_id = userResponse.data.user_id;  // Assuming user_response contains the user_id
       const response = await axios.post('http://localhost:5028/api/Renter/addRenter', newRenter);
+
       
       // Update local list with new renter
       setRenterList(prev => [...prev, response.data]);
@@ -160,7 +192,7 @@ const Drivers = () => {
     setRenterEmail("");
     setRenterEmergencyContact("");
     setRenterAddress("");
-    setRenterIdPhoto("");
+    // setRenterIdPhoto("");
     setFormData({
       email: '',
       password: '',
@@ -175,6 +207,13 @@ const Drivers = () => {
     driver.renter_lname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     driver.renter_email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0]; // Get the first file selected
+  //   if (file) {
+  //     setRenterIdPhoto(file); // Save the file to the state
+  //   }
+  // };
   
   return (
     <div className="drivers-container">
@@ -258,7 +297,7 @@ const Drivers = () => {
                     </div>
                   )}
 
-                  {selectedDriver.pickupLocation && (
+                  {/* {selectedDriver.pickupLocation && (
                     <div className="info-section">
                       <div>Pick up Location: {selectedDriver.pickupLocation}</div>
                       <div>Pick up Date: {selectedDriver.pickupDate}</div>
@@ -267,24 +306,32 @@ const Drivers = () => {
                       <div>Dropoff Date: {selectedDriver.dropoffDate}</div>
                       <div>Dropoff Time: {selectedDriver.dropoffTime}</div>
                     </div>
-                  )}
+                  )} */}
 
-                  {selectedDriver.renter_id_photo_1 && (
-                    <div className="photos-section">
-                      <div className="photos-header">GOVERNMENT-ISSUED ID</div>
-                      <div className="photos-grid">
-                          <img
-                            src={selectedDriver.renter_id_photo_1}
-                            alt={`GOV ID`}
-                            className="id-photo"
-                          />
-                      </div>
+                  {recentTrips.length > 0 ? (
+                    <div className="recent-trips">
+                      <h5>Recent Trips</h5>
+                        {recentTrips.map((trip, index) => (
+                          <div key={index} className='recent-trips-box'>
+                            <div>Car Model: {trip.car_model}</div>
+                            <div>Pickup Date: {trip.pickupDate}</div>
+                            <div>Pickup Time: {trip.pickupTime}</div>
+                          </div>
+                        ))}
                     </div>
-                  )}
+                    ) : (
+                      <div className="recent-trips">
+                        <h5>Recent Trips</h5>
+                        <div className="no-recent-trips">No recent trips</div>
+                      </div>
+                    )}
+
                 </div>
               </div>
             </div>
           )}
+
+
         </div>
       </main>
 
@@ -381,6 +428,7 @@ const Drivers = () => {
           onHide={() => setShowAddVehicleModal(false)}
           size="lg"
           dialogClassName="custom-modal"
+          centered
         >
           <Modal.Header closeButton>
             <Modal.Title className="text w-100" style={{ fontWeight: 'bold', color: '#f76d20' }}>
@@ -428,6 +476,7 @@ const Drivers = () => {
             <Form.Group className="col-md-6">
                 <Form.Label>Birthday</Form.Label>
                 <Form.Control
+                  className="custom-dateform"
                   value={renterBirthday ? renterBirthday.toString().slice(0, 10) : ""}
                   onChange={(e) => {
                     const selectedDate = new Date(e.target.value);
@@ -483,17 +532,6 @@ const Drivers = () => {
                 />
               </Form.Group>
             </div>
-            <div className="row">
-            <Form.Group className="col-md-12">
-                <Form.Label>Upload ID</Form.Label>
-                <Form.Control 
-                  value={renterIdPhoto} 
-                  onChange={(e) => setRenterIdPhoto(e.target.value)}
-                  size="sm" 
-                  type="text" 
-                />
-              </Form.Group>
-            </div>
           </Form>
       
           </Modal.Body>
@@ -533,13 +571,13 @@ const Drivers = () => {
         <Modal.Body>
           <Form onSubmit={handleSubmitAccount}>
           <Form.Group className="mb-4">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            value={renterEmail}  
-            readOnly      
-          />
-        </Form.Group>
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              value={renterEmail}  
+              readOnly      
+            />
+          </Form.Group>
 
             <Form.Group className="mb-4">
               <Form.Label>Password</Form.Label>
@@ -549,8 +587,11 @@ const Drivers = () => {
                 placeholder="Enter password"
                 value={formData.password}
                 onChange={handleInputChange}
+                isInvalid={!!passwordError}
                 required
               />
+                <Form.Control.Feedback type="invalid">{passwordError}</Form.Control.Feedback>
+
             </Form.Group>
 
             <Form.Group className="mb-4">
@@ -561,8 +602,11 @@ const Drivers = () => {
                 placeholder="Confirm password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
+                isInvalid={!!passwordError}
                 required
               />
+                <Form.Control.Feedback type="invalid">{passwordError}</Form.Control.Feedback>
+
             </Form.Group>
 
             <div className="d-flex justify-content-center">
