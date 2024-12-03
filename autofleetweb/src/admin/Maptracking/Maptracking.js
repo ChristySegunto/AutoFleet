@@ -19,6 +19,8 @@ function Maptracking() {
     const [rentedVehicles, setRentedVehicles] = useState([]);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const mapContainerRef = useRef(null);
+    const [tripSummary, setTripSummary] = useState(null); // Add state for trip summary
+
     
    // const mapInstanceRef = useRef(null);
     const [renterList, setRenterList] = useState([]);
@@ -46,13 +48,24 @@ function Maptracking() {
     // State for current marker position
     const [markerPosition, setMarkerPosition] = useState(null);
   
-
+    const sortVehicles = (vehicles) => {
+      const statusOrder = {
+        "Ongoing": 1,
+        "Upcoming": 2,
+        "Completed": 3
+      };
+    
+      return vehicles.sort((a, b) => statusOrder[a.rent_status] - statusOrder[b.rent_status]);
+    };
+    
     // Fetch all rented vehicles from the backend
     useEffect(() => {
         axios.get('http://localhost:5028/api/RentedVehicle')
             .then((response) => {
-                setRentedVehicles(response.data);
-                console.log(rentedVehicles);
+                console.log('Fetched rented vehicles:', response.data);
+                const sortedVehicles = sortVehicles(response.data); // Sort the vehicles here
+                setRentedVehicles(sortedVehicles);
+                console.log('Set rented vehicles:', sortedVehicles);
             })
             .catch((error) => {
                 console.error('Error fetching rented vehicles:', error);
@@ -89,8 +102,22 @@ function Maptracking() {
         return; // Exit early if rented_vehicle_id is missing
       }
     
-      console.log("Selected Rented Vehicle ID: ", rentedVehicleId);
-      fetchRealTimeCarLocation(rentedVehicleId); // Pass rentedVehicleId instead of vehicle.rented_vehicle_id
+      // Check the rent status before proceeding
+      if (vehicle.rent_status === "Upcoming") {
+        alert("The renter has not yet started the trip.");
+        resetMap(); // Reset the map since the trip hasn't started yet
+      }
+
+      if (vehicle.rent_status === "Completed") {
+        alert("Trip Completed");
+        fetchTripSummary(rentedVehicleId);
+        resetMap(); // Reset map, no real-time tracking is needed for completed trips
+      }
+
+      if (vehicle.rent_status === "Ongoing") {
+        fetchRealTimeCarLocation(rentedVehicleId);
+      }
+
     };
 
 
@@ -142,12 +169,24 @@ function Maptracking() {
             });
     };
 
+    const fetchTripSummary = (rentedVehiclesId) => {
+      axios.get(`http://localhost:5028/api/Location/trip-summary/${rentedVehiclesId}`)
+      .then((response) => {
+        const tripSummaryData = response.data;
+        setTripSummary(tripSummaryData);
+      })
+      .catch((error) => {
+        console.error('Error fetching trip summary:', error);
+      });
+
+    };
+
     useEffect(() => {
       const intervalId = setInterval(() => {
-          if (selectedVehicle) {
+          if (selectedVehicle && selectedVehicle.rent_status === "Ongoing") {
               fetchRealTimeCarLocation(selectedVehicle.rented_vehicle_id);
           }
-      }, 2000); // Update every 5 seconds
+      }, 2000); // Update every 2 seconds
   
       return () => clearInterval(intervalId); // Clean up interval on component unmount
     }, [selectedVehicle]);
@@ -232,6 +271,17 @@ const formatDate = (dateStr) => {
       .then((response) => {
         alert("Trip saved successfully!");
         setShowModal(false);
+        
+        // Re-fetch rented vehicles and update state to trigger a re-render
+        axios.get('http://localhost:5028/api/RentedVehicle')
+        .then((response) => {
+            console.log('Fetched rented vehicles after new rental:', response.data);
+            const sortedVehicles = sortVehicles(response.data); // Sort the vehicles here
+            setRentedVehicles(sortedVehicles);  // Update the rented vehicles state
+        })
+        .catch((error) => {
+            console.error('Error fetching rented vehicles:', error);
+        });
       })
       .catch((error) => {
         console.error("Error saving trip:", error.response?.data || error.message);
@@ -359,6 +409,13 @@ const formatDate = (dateStr) => {
                                     <p><strong>Drop-off Time:</strong> {selectedVehicle.dropoff_time}</p>
                                     <p><strong>Car:</strong> {selectedVehicle.car_manufacturer} {selectedVehicle.car_model}</p>
                                     <p><strong>Plate Number:</strong> {selectedVehicle.plate_number}</p>
+                                    {tripSummary && (
+                                        <div className="trip-summary">
+                                            <h5>Trip Summary</h5>
+                                            <p><strong>Total Distance Travelled:</strong> {tripSummary.totalDistanceTravelled} km</p>
+                                            <p><strong>Total Fuel Consumption:</strong> {tripSummary.totalFuelConsumption} L</p>
+                                        </div>
+                                    )}
                                 </Card.Body>
                             </Card>
                         )}
@@ -385,13 +442,13 @@ const formatDate = (dateStr) => {
                       </option>
                     ))}
                   </select>
-                  {selectedRenter && (
+                  {/* {selectedRenter && (
                     <div>
                       <h5>Renter Details:</h5>
                       <p><strong>First Name:</strong> {selectedRenter.renter_fname}</p>
                       <p><strong>Last Name:</strong> {selectedRenter.renter_lname}</p>
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Vehicle Selection */}
@@ -407,14 +464,14 @@ const formatDate = (dateStr) => {
                       </option>
                     ))}
                   </select>
-                  {selectedVehicle && (
+                  {/* {selectedVehicle && (
                     <div>
                       <h5>Vehicle Details:</h5>
                       <p><strong>Manufacturer:</strong> {selectedVehicle.car_manufacturer}</p>
                       <p><strong>Model:</strong> {selectedVehicle.car_model}</p>
                       <p><strong>Plate Number:</strong> {selectedVehicle.plate_number}</p>
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Trip Details */}

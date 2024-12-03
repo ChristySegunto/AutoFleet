@@ -255,7 +255,7 @@ h1 {
     background-color: #e74c3c; /* Red for Upcoming */
 }
 
-.vehicle-card .status-label.active {
+.vehicle-card .status-label.ongoing {
     background-color: #f39c12; /* Yellow for Active */
 }
 
@@ -266,9 +266,9 @@ h1 {
 /* Styling for the selected trip card */
 .selected-vehicle-card {
   position: absolute;
-  top: 5%; /* Adjust this based on where you want it to appear */
+  top: 20px !important; /* Adjust this based on where you want it to appear */
   /* left: 10%; */
-  transform: translateX(-50%);
+  /* transform: translateX(100%) !important; */
   width: 350px; /* Adjust the width based on your design */
   z-index: 999; /* Ensures the card stays above the map */
   opacity: 0; /* Start with an invisible card */
