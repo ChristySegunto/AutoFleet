@@ -138,12 +138,17 @@
 
 .vehicles-container .status {
   min-width: 90px;
-  padding: 6px 12px;
   border-radius: 20px;
   text-align: center;
   display: inline-block;
   font-size: 13px;
   line-height: normal;
+  display: block;
+  width: 100%;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 .vehicles-container .status.repair {
@@ -274,8 +279,8 @@
   border: 0;
 }
 
-
-.vehicles-container .status-pending {
+.vehicles-container .status-pending,
+.vehicle-details-view .profile-section .pending {
   color: #CC3C3C;
   background-color: #FFD9D9;
   border: 0;
@@ -283,15 +288,8 @@
   text-align: center;
 }
 
-.vehicles-container .status-pending:hover {
-  color: #d03131;
-  background-color: #ffa9a9;
-  border: 0;
-  border-radius: 15px;
-  text-align: center;
-}
-
-.vehicles-container .status-rented{
+.vehicles-container .status-rented,
+.vehicle-details-view .profile-section .rented{
   color: #ff6a18;
   background-color: #fbd8c6;
   border: 0;
@@ -299,15 +297,8 @@
   text-align: center;
 }
 
-.vehicles-container .status-rented:hover{
-  color: #ff6a18;
-  background-color: #f7bea2;
-  border: 0;
-  border-radius: 15px;
-  text-align: center;
-}
-
-.vehicles-container .status-under-maintenance {
+.vehicles-container .status-under-maintenance,
+.vehicle-details-view .profile-section .maintenance {
   color: #767676;
   background-color: #E6E6E6;
   border: 0;
@@ -315,15 +306,8 @@
   text-align: center;
 }
 
-.vehicles-container .status-under-maintenance:hover {
-  color: #585858;
-  background-color: #bdbcbc;
-  border: 0;
-  border-radius: 15px;
-  text-align: center;
-}
-
-.vehicles-container .status-available{
+.vehicles-container .status-available, 
+.vehicle-details-view .profile-section .available {
   color: #68B031;
   background-color: #D1F1B9;
   border: 0;
@@ -331,11 +315,23 @@
   text-align: center;
 }
 
+.vehicle-details-view .profile-section .status {
+  padding: 10px;
+}
 
-.vehicles-container .status-available:hover{
-  color: #73ab48;
-  background-color: #b5ee8a;
-  border: 0;
-  border-radius: 15px;
-  text-align: center;
+.vehicle-details-view .profile-section {
+  display: flex; /* Enables flexbox */
+  flex-direction: row; /* Aligns items horizontally */
+  gap: 20px; /* Adds spacing between items */
+  align-items: center; /* Aligns items vertically (optional) */
+  justify-content: space-between; /* Distributes items with space between (optional) */
+}
+
+.modal-vehicle-title.modal-title h2{
+  color: #FF6A18;
+}
+
+.vehicle-details-view .modal-vehicle-title.modal-title {
+  color: #1c4587;
+  font-size: 1.5rem;
 }

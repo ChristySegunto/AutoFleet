@@ -99,35 +99,11 @@ const Vehicles = () => {
       });
   };
 
-  // Handle changing the status of a vehicle
-  const handleStatusChange = (vehicleId, newStatus) => {
-    axios.put(
-      `http://localhost:5028/api/Vehicle/${vehicleId}/status`,  // Send PUT request to update vehicle status
-      newStatus,  // New status to be set
-      {
-        headers: { 'Content-Type': 'application/json' }  // Set content type to JSON
-      }
-    )
-    .then(() => {
-      setVehicles(prevVehicles => 
-        prevVehicles.map(vehicle => 
-          vehicle.vehicle_id === vehicleId  // Find the updated vehicle by ID
-            ? { ...vehicle, vehicle_status: newStatus, updated_at: formatDate(new Date()) }  // Update status and updated_at
-            : vehicle
-        )
-      );
-    })
-    .catch(error => {
-      console.error("Error updating status:", error.response?.data || error.message);  // Log error if status update fails
-      alert("Failed to update status.");  // Show failure alert
-    });
-  };
-
   // Validate the form before saving data
   const validateForm = () => {
     const { plate_number, car_model, vehicle_status, total_mileage, fuel_type, transmission_type, manufacture_year, car_manufacturer, vehicle_color,
-            total_fuel_consumption, distance_traveled, seating_capacity,vehicle_category } = selectedVehicle || {};
-    
+            total_fuel_consumption, distance_traveled, seating_capacity, vehicle_category } = selectedVehicle || {};
+
     const newErrors = {};  // Object to hold validation errors
     const numberFields = [
       { field: 'total_mileage', message: "Total mileage must be a positive number." },
@@ -141,24 +117,38 @@ const Vehicles = () => {
     if (!vehicle_status) newErrors.vehicle_status = "Vehicle status is required.";
     if (!fuel_type) newErrors.fuel_type = "Fuel type is required.";
     if (!transmission_type) newErrors.transmission_type = "Transmission type is required.";
-    if (!total_mileage) newErrors.total_mileage = "Total mileage is required.";
-    if (!total_fuel_consumption) newErrors.total_fuel_consumption = "Total fuel consumption is required.";
-    if (!distance_traveled) newErrors.distance_traveled = "Distance traveled is required.";
+    if (total_mileage === '' || total_mileage === null) newErrors.total_mileage = "Total mileage is required.";
+    if (total_fuel_consumption === '' || total_fuel_consumption === null) newErrors.total_fuel_consumption = "Total fuel consumption is required.";
+    if (distance_traveled === '' || distance_traveled === null) newErrors.distance_traveled = "Distance traveled is required.";
     if (!seating_capacity) newErrors.seating_capacity = "Seating capacity is required.";
     if (!car_manufacturer) newErrors.car_manufacturer = "Car manufacturer is required.";  
-    if (!manufacture_year) newErrors.manufacture_year = "Year of Manufacture is required.";
     if (!vehicle_color) newErrors.vehicle_color = "Vehicle Color is required.";
     if (!vehicle_category) newErrors.vehicle_category = "Vehicle Category is required.";
 
     // Check if numeric fields are positive numbers
     numberFields.forEach(({ field, message }) => {
       const value = selectedVehicle[field];
-      if (!value || isNaN(value) || value < 0) newErrors[field] = message;  // Add error message if invalid
+      if (value === '' || value === null || isNaN(value) || value < 0) {
+        newErrors[field] = message;  // Add error message if it's not a valid positive number
+      }
     });
 
+    if (manufacture_year === '' || manufacture_year === null) {
+      newErrors.manufacture_year = "Year of manufacture is required.";  // Add error message if empty or null
+    } else {
+      const manufactureYear = Number(manufacture_year); // Convert to number
+      if (isNaN(manufactureYear) || manufactureYear <= 0 || !Number.isInteger(manufactureYear)) {
+        newErrors.manufacture_year = "Year of manufacture must be a positive number."; // Invalid year
+
+      }
+    }
+
     // Check if seating capacity is an integer
-    if (seating_capacity && !Number.isInteger(Number(seating_capacity))) {
-      newErrors.seating_capacity = "Seating capacity must be an integer.";  // Add error message for invalid seating capacity
+    if (seating_capacity) {
+      const seatingCap = Number(seating_capacity);
+      if (!Number.isInteger(seatingCap) || seatingCap <= 0) {
+        newErrors.seating_capacity = "Seating capacity must be a positive number.";  // Invalid seating capacity
+      }
     }
 
     setErrors(newErrors);  // Set errors state
@@ -167,6 +157,12 @@ const Vehicles = () => {
   
   // Save or update vehicle data
   const handleSave = () => {
+
+    if (!selectedVehicle.vehicle_id) {
+      selectedVehicle.vehicle_status = "Available";
+    }
+
+    console.log(selectedVehicle);
     if (!validateForm()) return;  // Return early if validation fails
   
     const newVehicle = {
@@ -266,7 +262,7 @@ const Vehicles = () => {
               key={index}
               onClick={(e) => {
                 // Check if the click target is not in the 'text-center' or 'actions-icons' columns
-                const clickedInsideActions = e.target.closest('.text-center, .actions-icons');
+                const clickedInsideActions = e.target.closest('.actions-icons');
                 
                 // If clicked outside the status dropdown or action buttons, trigger the row click
                 if (!clickedInsideActions) {
@@ -279,22 +275,11 @@ const Vehicles = () => {
               <td>{vehicle.plate_number}</td>
               <td>{vehicle.car_model}</td>
               <td className="text-center">
-                <Form.Control
-                  as="select"
-                  value={vehicle.vehicle_status}
-                  onChange={(e) => {
-                    e.stopPropagation(); // Stop the click event from propagating to the row click handler
-                    handleStatusChange(vehicle.vehicle_id, e.target.value);
-                  }}
-                  className={`status-${vehicle.vehicle_status.toLowerCase().replace(' ', '-')}`}
+                <span
+                  className={`status status-${vehicle.vehicle_status?.toLowerCase().replace(' ', '-')}`}
                 >
-                  {/* Only show "No Status" option if the vehicle doesn't have a status */}
-                  {!vehicle.vehicle_status && <option value="">No Status</option>}
-                  <option value="Available">Available</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Rented">Rented</option>
-                  <option value="Under Maintenance">Under Maintenance</option>
-                </Form.Control>
+                  {vehicle.vehicle_status || "No Status"}
+                </span>
               </td>
               <td className="actions-icons">
                 <Button className="action-btn" onClick={(e) => {
@@ -326,289 +311,256 @@ const Vehicles = () => {
       <Modal className='modal-vehicle' show={showModal} onHide={handleClose} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title className='modal-vehicle-title'>
-            <b>
+            <h2>
               {modalMode === 'add' && 'ADD VEHICLE'}
               {modalMode === 'view' && 'VIEW VEHICLE DETAILS'}
               {modalMode === 'edit' && 'EDIT VEHICLE'}
-            </b>
+            </h2>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <Tabs 
-            activeKey={activeTab} 
-            onSelect={(k) => setActiveTab(k)} 
-            className="mb-3"
-          >
-            <Tab eventKey="details" title="Details">
-              <div className="vehicle-details-view">
-                {/* Check if selectedVehicle exists before rendering */}
-                {modalMode === 'view' && selectedVehicle && (
-                  <>
-                    <div className="profile-section">
-                      <div className="vehicle-info">
-                        <div className="registration-number">
-                          REGISTRATION NUMBER: {selectedVehicle.plate_number}
-                        </div>
-                        <h3 className="vehicle-model">{selectedVehicle.car_model}</h3>
-                      </div>
-
-                      <span className={`status ${selectedVehicle.vehicle_status.toLowerCase()}`}>
-                        {selectedVehicle.vehicle_status}
-                      </span>
+          <div className="vehicle-details-view">
+            {/* Check if selectedVehicle exists before rendering */}
+            {modalMode === 'view' && selectedVehicle && (
+              <>
+                <div className="profile-section">
+                  <div className="vehicle-info">
+                    <div className="registration-number">
+                      REGISTRATION NUMBER: {selectedVehicle.plate_number}
                     </div>
-                    <hr />
-                  </>
-                )}
+                    <h3 className="vehicle-model">{selectedVehicle.car_model}</h3>
+                  </div>
+                  
+                  <span className={`status ${selectedVehicle.vehicle_status.toLowerCase()}`}>
+                    {selectedVehicle.vehicle_status}
+                  </span>
+                </div>
+              </>
+            )}
 
-                <Form>
-                  {(modalMode === 'add' || modalMode === 'edit') && (
-                    <>
-                      <Row md={2}>
-                        <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="plateNumber">
-                          <Form.Label className="modal-vehicle-label">Plate Number</Form.Label>
-                          <Form.Control 
-                            className="modal-vehicle-control" 
-                            type="text" 
-                            placeholder="Enter Plate Number"
-                            value={selectedVehicle?.plate_number || ''}
-                            onChange={(e) => setSelectedVehicle({ ...selectedVehicle, plate_number: e.target.value })}
-                            disabled={modalMode === 'view'}
-                          />
-                          {errors.plate_number && <Form.Text className="text-danger">{errors.plate_number}</Form.Text>}
-                        </Form.Group>
-
-                        <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="carModel">
-                          <Form.Label className="modal-vehicle-label">Car Model</Form.Label>
-                          <Form.Control 
-                            className="modal-vehicle-control" 
-                            type="text" 
-                            placeholder="Enter Car Model"
-                            value={selectedVehicle?.car_model || ''}                          
-                            onChange={(e) => setSelectedVehicle({ ...selectedVehicle, car_model: e.target.value })}
-                            disabled={modalMode === 'view'}
-                          />
-                          {errors.car_model && <Form.Text className="text-danger">{errors.car_model}</Form.Text>}
-                        </Form.Group>
-
-                        <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="vehicleStatus">
-                          <Form.Label className="modal-vehicle-label">Vehicle Status</Form.Label>
-                          <Form.Select 
-                            className="modal-vehicle-control"
-                            value={selectedVehicle?.vehicle_status || ''}
-                            onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_status: e.target.value })}
-                            disabled={modalMode === 'view'}
-                          >
-                            <option value="">Select Status</option>
-                            <option value="Available">Available</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Rented">Rented</option>
-                            <option value="Under Maintenance">Under Maintenance</option>
-                          </Form.Select>
-                          {errors.vehicle_status && <Form.Text className="text-danger">{errors.vehicle_status}</Form.Text>}
-                        </Form.Group>
-                      </Row>
-                      <hr />
-                    </>
-                  )}
-
-                  <Col>
-                    <Modal.Title className="modal-vehicle-title">VEHICLE SPECS</Modal.Title>
-                    <Row md={3}>
-                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleFuel">
-                        <Form.Label className="modal-vehicle-label">Fuel Type</Form.Label>
-                        <Form.Select
-                          className="modal-vehicle-control" 
-                          value={selectedVehicle?.fuel_type || ''}
-                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, fuel_type: e.target.value })}
-                          disabled={modalMode === 'view'}
-                        >
-                          {!selectedVehicle?.fuel_type && <option value="">Select Fuel Type</option>}
-                          <option value="Diesel">Diesel</option>
-                          <option value="Gasoline">Gasoline</option>
-                          <option value="Electric">Electric</option>
-                        </Form.Select>
-                        {errors.fuel_type && <Form.Text className="text-danger">{errors.fuel_type}</Form.Text>}
-                      </Form.Group>
-
-                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleTransmission">
-                        <Form.Label className="modal-vehicle-label">Transmission Type</Form.Label>
-                        <Form.Select 
-                          className="modal-vehicle-control" 
-                          value={selectedVehicle?.transmission_type || ''}
-                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, transmission_type: e.target.value })}
-                          disabled={modalMode === 'view'}
-                        >
-                          {!selectedVehicle?.transmission_type && <option value="">Select Transmission Type</option>}
-                          <option value="Manual">Manual</option>
-                          <option value="Automatic">Automatic</option>
-                        </Form.Select>
-                        {errors.transmission_type && <Form.Text className="text-danger">{errors.transmission_type}</Form.Text>}
-                      </Form.Group>
-
-                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCapacity">
-                        <Form.Label className="modal-vehicle-label">Seating Capacity</Form.Label>
-                        <Form.Control 
-                          className="modal-vehicle-control" 
-                          type="text" 
-                          placeholder="Enter Seating Capacity"
-                          value={selectedVehicle?.seating_capacity || ''}
-                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, seating_capacity: e.target.value })}
-                          disabled={modalMode === 'view'}
-                        />
-                        {errors.seating_capacity && <Form.Text className="text-danger">{errors.seating_capacity}</Form.Text>}
-                      </Form.Group>
-                    </Row>
-
-                    <Row md={2}>
-                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleMileage">
-                        <Form.Label className="modal-vehicle-label">Vehicle Mileage</Form.Label>
-                        <Form.Control 
-                          className="modal-vehicle-control" 
-                          type="text" 
-                          placeholder="Enter Mileage"
-                          value={selectedVehicle?.total_mileage || ''}
-                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, total_mileage: e.target.value })}
-                          disabled={modalMode === 'view'}
-                        />
-                        {errors.total_mileage && <Form.Text className="text-danger">{errors.total_mileage}</Form.Text>}
-                      </Form.Group>
-
-                      <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCategory">
-                        <Form.Label className="modal-vehicle-label">Vehicle Category</Form.Label>
-                        <Form.Select
-                          className="modal-vehicle-control"
-                          value={selectedVehicle?.vehicle_category || ''}
-                          onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_category: e.target.value })}
-                          disabled={modalMode === 'view'}
-                        >
-                          {!selectedVehicle?.vehicle_category && <option value="">Select Category</option>}
-                          <option value="Sedan">Sedan</option>
-                          <option value="SUV">SUV</option>
-                        </Form.Select>
-                        {errors.vehicle_category && <Form.Text className="text-danger">{errors.vehicle_category}</Form.Text>}
-                      </Form.Group>
-                    </Row>
-                  </Col>
-                </Form>
-              </div>
-            </Tab>
-
-            <Tab eventKey="additional" title="Additional Details">
-              <Form>
-                <Col>
-                  <Row md={1}>
-                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleManufacturer">
-                      <Form.Label className="modal-vehicle-label">Manufacturer</Form.Label>
-                      <Form.Control 
-                        className="modal-vehicle-control" 
-                        type="text" 
-                        placeholder="Enter Manufacturer"
-                        value={selectedVehicle?.car_manufacturer || ''}  // Use 'value' here
-                        disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, car_manufacturer: e.target.value })} // Ensure onChange updates state
-                      />
-                      {errors.car_manufacturer && <Form.Text className="text-danger">{errors.car_manufacturer}</Form.Text>}
-                    </Form.Group>
-                  </Row>
-
+            <Form>
+              {(modalMode === 'add' || modalMode === 'edit') && (
+                <>
                   <Row md={2}>
-                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleBirthyear">
-                      <Form.Label className="modal-vehicle-label">Year of Manufacture</Form.Label>
+                    <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="plateNumber">
+                      <Form.Label className="modal-vehicle-label">Plate Number</Form.Label>
                       <Form.Control 
                         className="modal-vehicle-control" 
                         type="text" 
-                        placeholder="Enter Year of Manufacture"
-                        value={selectedVehicle?.manufacture_year || ''}  // Use 'value' here instead of 'defaultValue'
+                        placeholder="Enter Plate Number"
+                        value={selectedVehicle?.plate_number || ''}
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, plate_number: e.target.value })}
                         disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, manufacture_year: e.target.value })} // Ensure onChange updates state
                       />
-                      {errors.manufacture_year && <Form.Text className="text-danger">{errors.manufacture_year}</Form.Text>}
+                      {errors.plate_number && <Form.Text className="text-danger">{errors.plate_number}</Form.Text>}
                     </Form.Group>
 
-                    <Form.Group className="modal-vehicle-formgroup" controlId="vehicleColor">
-                      <Form.Label className="modal-vehicle-label">Vehicle Color</Form.Label>
+                    <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="carModel">
+                      <Form.Label className="modal-vehicle-label">Car Model</Form.Label>
                       <Form.Control 
                         className="modal-vehicle-control" 
                         type="text" 
-                        placeholder="Enter Color"
-                        value={selectedVehicle?.vehicle_color || ''}  // Use 'value' here
+                        placeholder="Enter Car Model"
+                        value={selectedVehicle?.car_model || ''}                          
+                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, car_model: e.target.value })}
                         disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_color: e.target.value })} // Ensure onChange updates state
                       />
-                      {errors.vehicle_color && <Form.Text className="text-danger">{errors.vehicle_color}</Form.Text>}
-                    </Form.Group>
-                  </Row>
-                </Col>
-              </Form>
-            </Tab>
-
-            <Tab eventKey="specs" title="Fuel Consumption & Others">
-              <Form>
-                <Col>
-                  <Row md={2}>
-                    <Form.Group className="modal-vehicle-formgroup" controlId="totalFuelConsumption">
-                      <Form.Label className="modal-vehicle-label">Total Fuel Consumption</Form.Label>
-                      <Form.Control 
-                        className="modal-vehicle-control" 
-                        type="text" 
-                        placeholder="Enter Total Fuel Consumption" 
-                        value={selectedVehicle?.total_fuel_consumption || ''}  // Use 'value' here
-                        disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, total_fuel_consumption: e.target.value })} // Ensure onChange updates state
-                      />
-                      {errors.total_fuel_consumption && <Form.Text className="text-danger">{errors.total_fuel_consumption}</Form.Text>}
-                    </Form.Group>
-
-                    <Form.Group className="modal-vehicle-formgroup" controlId="distanceTraveled">
-                      <Form.Label className="modal-vehicle-label">Distance Traveled</Form.Label>
-                      <Form.Control 
-                        className="modal-vehicle-control" 
-                        type="text" 
-                        placeholder="Enter Distance Traveled" 
-                        value={selectedVehicle?.distance_traveled || ''}  // Use 'value' here
-                        disabled={modalMode === 'view'}
-                        onChange={(e) => setSelectedVehicle({ ...selectedVehicle, distance_traveled: e.target.value })} // Ensure onChange updates state
-                      />
-                      
-                      {errors.distance_traveled && <Form.Text className="text-danger">{errors.distance_traveled}</Form.Text>}
+                      {errors.car_model && <Form.Text className="text-danger">{errors.car_model}</Form.Text>}
                     </Form.Group>
                   </Row>
+                </>
+              )}
 
+              <hr />
+
+              <Col>
+                <Modal.Title className="modal-vehicle-title">VEHICLE SPECS</Modal.Title>
+                <Row md={3}>
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleFuel">
+                    <Form.Label className="modal-vehicle-label">Fuel Type</Form.Label>
+                    <Form.Select
+                      className="modal-vehicle-control" 
+                      value={selectedVehicle?.fuel_type || ''}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, fuel_type: e.target.value })}
+                      disabled={modalMode === 'view'}
+                    >
+                      {!selectedVehicle?.fuel_type && <option value="">Select Fuel Type</option>}
+                      <option value="Diesel">Diesel</option>
+                      <option value="Gasoline">Gasoline</option>
+                      <option value="Electric">Electric</option>
+                      <option value="Hybrid">Hybrid</option>
+                    </Form.Select>
+                    {errors.fuel_type && <Form.Text className="text-danger">{errors.fuel_type}</Form.Text>}
+                  </Form.Group>
+
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleTransmission">
+                    <Form.Label className="modal-vehicle-label">Transmission Type</Form.Label>
+                    <Form.Select 
+                      className="modal-vehicle-control" 
+                      value={selectedVehicle?.transmission_type || ''}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, transmission_type: e.target.value })}
+                      disabled={modalMode === 'view'}
+                    >
+                      {!selectedVehicle?.transmission_type && <option value="">Select Transmission Type</option>}
+                      <option value="Manual">Manual</option>
+                      <option value="Automatic">Automatic</option>
+                      <option value="Dual-clutch">Dual-clutch</option>
+                      <option value="CVT">CVT</option>
+                    </Form.Select>
+                    {errors.transmission_type && <Form.Text className="text-danger">{errors.transmission_type}</Form.Text>}
+                  </Form.Group>
+
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCapacity">
+                    <Form.Label className="modal-vehicle-label">Seating Capacity</Form.Label>
+                    <Form.Control 
+                      className="modal-vehicle-control" 
+                      type="text" 
+                      placeholder="Enter Seating Capacity"
+                      value={selectedVehicle?.seating_capacity || ''}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, seating_capacity: e.target.value })}
+                      disabled={modalMode === 'view'}
+                    />
+                    {errors.seating_capacity && <Form.Text className="text-danger">{errors.seating_capacity}</Form.Text>}
+                  </Form.Group>
+                </Row>
+
+                <Row md={2}>
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleCategory">
+                    <Form.Label className="modal-vehicle-label">Vehicle Category</Form.Label>
+                    <Form.Select
+                      className="modal-vehicle-control"
+                      value={selectedVehicle?.vehicle_category || ''}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_category: e.target.value })}
+                      disabled={modalMode === 'view'}
+                    >
+                      {!selectedVehicle?.vehicle_category && <option value="">Select Category</option>}
+                      <option value="Sedan">Sedan</option>
+                      <option value="SUV">SUV</option>
+                      <option value="Van">Van</option>
+                      <option value="Minivan">Minivan</option>
+                      <option value="Coupe">Coupe</option>
+                      <option value="Pickup">Pickup</option>
+                      <option value="Jeep">Jeep</option>
+                    </Form.Select>
+                    {errors.vehicle_category && <Form.Text className="text-danger">{errors.vehicle_category}</Form.Text>}
+                  </Form.Group>
+
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleColor">
+                    <Form.Label className="modal-vehicle-label">Vehicle Color</Form.Label>
+                    <Form.Control 
+                      className="modal-vehicle-control" 
+                      type="text" 
+                      placeholder="Enter Color"
+                      value={selectedVehicle?.vehicle_color || ''}  // Use 'value' here
+                      disabled={modalMode === 'view'}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, vehicle_color: e.target.value })} // Ensure onChange updates state
+                    />
+                    {errors.vehicle_color && <Form.Text className="text-danger">{errors.vehicle_color}</Form.Text>}
+                  </Form.Group>
+                </Row>
+
+                <Row md={2}>
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleManufacturer">
+                    <Form.Label className="modal-vehicle-label">Manufacturer</Form.Label>
+                    <Form.Control 
+                      className="modal-vehicle-control" 
+                      type="text" 
+                      placeholder="Enter Manufacturer"
+                      value={selectedVehicle?.car_manufacturer || ''}  // Use 'value' here
+                      disabled={modalMode === 'view'}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, car_manufacturer: e.target.value })} // Ensure onChange updates state
+                    />
+                    {errors.car_manufacturer && <Form.Text className="text-danger">{errors.car_manufacturer}</Form.Text>}
+                  </Form.Group>
+
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleBirthyear">
+                    <Form.Label className="modal-vehicle-label">Year of Manufacture</Form.Label>
+                    <Form.Control 
+                      className="modal-vehicle-control" 
+                      type="text" 
+                      placeholder="Enter Year of Manufacture"
+                      value={selectedVehicle?.manufacture_year || ''}  // Use 'value' here instead of 'defaultValue'
+                      disabled={modalMode === 'view'}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, manufacture_year: e.target.value })} // Ensure onChange updates state
+                    />
+                    {errors.manufacture_year && <Form.Text className="text-danger">{errors.manufacture_year}</Form.Text>}
+                  </Form.Group>
+                </Row>
+              </Col>
+
+              <hr />
+
+              <Col>
+                <Modal.Title className="modal-vehicle-title">Fuel Consumption & Others</Modal.Title>
+                <Row md={3}>
+                  <Form.Group className="modal-vehicle-formgroup" controlId="vehicleMileage">
+                    <Form.Label className="modal-vehicle-label">Vehicle Mileage</Form.Label>
+                    <Form.Control 
+                      className="modal-vehicle-control" 
+                      type="text" 
+                      placeholder="Enter Mileage"
+                      value={selectedVehicle?.total_mileage === null || selectedVehicle?.total_mileage === '' ? '' : selectedVehicle?.total_mileage}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, total_mileage: e.target.value })}
+                      disabled={modalMode === 'view'}
+                    />
+                    {errors.total_mileage && <Form.Text className="text-danger">{errors.total_mileage}</Form.Text>}
+                  </Form.Group>
+
+                  <Form.Group className="modal-vehicle-formgroup" controlId="totalFuelConsumption">
+                    <Form.Label className="modal-vehicle-label">Total Fuel Consumption</Form.Label>
+                    <Form.Control 
+                      className="modal-vehicle-control" 
+                      type="text" 
+                      placeholder="Enter Total Fuel Consumption" 
+                      value={selectedVehicle?.total_fuel_consumption === null || selectedVehicle?.total_fuel_consumption === '' ? '' : selectedVehicle?.total_fuel_consumption}
+                      disabled={modalMode === 'view'}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, total_fuel_consumption: e.target.value })} // Ensure onChange updates state
+                    />
+                    {errors.total_fuel_consumption && <Form.Text className="text-danger">{errors.total_fuel_consumption}</Form.Text>}
+                  </Form.Group>
+
+                  <Form.Group className="modal-vehicle-formgroup" controlId="distanceTraveled">
+                    <Form.Label className="modal-vehicle-label">Distance Traveled</Form.Label>
+                    <Form.Control 
+                      className="modal-vehicle-control" 
+                      type="text" 
+                      placeholder="Enter Distance Traveled" 
+                      value={selectedVehicle?.distance_traveled === null || selectedVehicle?.distance_traveled === '' ? '' : selectedVehicle?.distance_traveled}
+                      disabled={modalMode === 'view'}
+                      onChange={(e) => setSelectedVehicle({ ...selectedVehicle, distance_traveled: e.target.value })} // Ensure onChange updates state
+                    />
+                    {errors.distance_traveled && <Form.Text className="text-danger">{errors.distance_traveled}</Form.Text>}
+                  </Form.Group>
+                </Row>
+              </Col>
+                {modalMode !== 'add' && modalMode !== 'edit' && (
+                  <>
+                  <hr />
                   <Row md={2}>
                     <Form.Group className="modal-vehicle-formgroup" controlId="createdAt">
                       <Form.Label className="modal-vehicle-label">
-                        {modalMode === 'add' ? 'Initial Create Date' : 'Created At'}
+                        {modalMode === 'add' ? 'Initial Create Date' : 'Created at: '}
                       </Form.Label>
-                      <Form.Control 
-                        className="modal-vehicle-control" 
-                        type="date" 
-                        value={
-                          modalMode === 'add' 
-                            ? formatDate(new Date()) 
-                            : formatDate(selectedVehicle?.created_at)
-                        }
-                        disabled
-                        readOnly
-                      />
+                      <div className="modal-vehicle-value">
+                        {modalMode === 'add' 
+                          ? formatDate(new Date()) 
+                          : formatDate(selectedVehicle?.created_at)}
+                      </div>
                     </Form.Group>
 
                     <Form.Group className="modal-vehicle-formgroup" controlId="updatedAt">
                       <Form.Label className="modal-vehicle-label">
                         {modalMode === 'add' ? 'Initial Update Date' : 'Updated At'}
                       </Form.Label>
-                      <Form.Control 
-                        className="modal-vehicle-control" 
-                        type="date" 
-                        value={formatDate(selectedVehicle?.updated_at)}
-                        disabled
-                        readOnly
-                      />
+                      <div className="modal-vehicle-value">
+                        {formatDate(selectedVehicle?.updated_at)}
+                      </div>
                     </Form.Group>
                   </Row>
-                </Col>
-              </Form>
-            </Tab>
-          </Tabs>
+                  </>
+                )}
+            </Form>
+          </div>
         </Modal.Body>
 
         <Modal.Footer>
