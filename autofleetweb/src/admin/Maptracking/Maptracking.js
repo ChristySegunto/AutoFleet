@@ -29,7 +29,7 @@ function Maptracking() {
     const [pickupTime, setPickupTime] = useState("");
     const [dropoffDate, setDropoffDate] = useState("");
     const [dropoffTime, setDropoffTime] = useState("");
-    const [hasAlertShown, setHasAlertShown] = useState(false);
+    const [alertShown, setAlertShown] = useState(false); // Track if the alert has been shown
 
 
     const mapRef = useRef(null); // Reference for the map instance
@@ -99,8 +99,17 @@ function Maptracking() {
         axios.get(`http://localhost:5028/api/Location/realtime/${rentedVehiclesId}`)
             .then((response) => {
                 const carUpdate = response.data;
-                const { locationLatitude, locationLongitude, speed, totalFuelConsumption, totalDistanceTravelled } = carUpdate;
+                const { locationLatitude, locationLongitude, speed, totalFuelConsumption, totalDistanceTravelled, rent_status } = carUpdate;
                 
+                // Check if there's no carUpdate
+                if (!carUpdate) {
+                    if (!alertShown) { // Show alert only if not already shown
+                        alert("The renter has not yet started the trip.");
+                        setAlertShown(true); // Set flag to true after showing the alert
+                    }
+                    resetMap(); // Reset the map if there's no car update
+                    return;
+                }
                 // Update marker position
                 setMarkerPosition({
                     longitude: locationLongitude,
@@ -122,10 +131,11 @@ function Maptracking() {
             })
             .catch((error) => {
                 if (error.response && error.response.status === 404) {
-                  alert("The renter has not yet started the trip.");
-                  Navigate('/maptracking')
-                  resetMap(); // A method you can define to reset the map state
-                  return;
+                  if (error.response && error.response.status === 404) {
+                      resetMap();
+                  } else {
+                      console.error('Error fetching real-time car location:', error);
+                  }
                 } else {
                     console.error('Error fetching real-time car location:', error);
                 }
