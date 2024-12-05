@@ -4,6 +4,7 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: auto;
 }
 
 .Maptracking .map-header {
@@ -266,7 +267,7 @@ h1 {
 /* Styling for the selected trip card */
 .selected-vehicle-card {
   position: absolute;
-  top: 20px !important; /* Adjust this based on where you want it to appear */
+  top: -150px !important; /* Adjust this based on where you want it to appear */
   /* left: 10%; */
   /* transform: translateX(100%) !important; */
   width: 350px; /* Adjust the width based on your design */
@@ -370,4 +371,10 @@ top: -40px !important;
 .mapboxgl-popup-close-button:hover {
     background-color: rgba(0, 0, 0, 0.2); /* Add background on hover */
     color: white; /* Change icon color on hover */
+}
+
+.trip-summary h5{
+    color: #ff6a18;
+    font-size: 1.5em;
+    font-weight: bold;
 }

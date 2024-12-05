@@ -52,24 +52,25 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    const fetchCarUpdates = async () => {
+    const fetchReports = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5028/api/Dashboard/get-car-updates'); // Replace with actual API endpoint
+        const response = await fetch('http://localhost:5028/api/Dashboard/Reports'); // Replace with your actual API endpoint
         if (response.ok) {
           const data = await response.json();
-          setCarUpdates(data);
+          console.log("Reports Data:", data); // Check if data is logged correctly
+          setCarUpdates(data); // Set report data
         } else {
-          setError('Failed to fetch car updates.');
+          setError('Failed to fetch reports.');
         }
       } catch (error) {
-        setError('Error fetching car updates: ' + error.message);
+        setError('Error fetching reports: ' + error.message);
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchCarUpdates();
+  
+    fetchReports();
   }, []);
 
   const fleetstatusdata = {
@@ -271,6 +272,29 @@ function Dashboard() {
     );
   }
   
+  // Function to convert time to 12-hour format
+  function convertTo12Hour(time) {
+    let [hours, minutes, seconds] = time.split(':');
+    let period = 'AM';
+
+    // Convert hours to a number to handle AM/PM logic
+    hours = parseInt(hours, 10);
+
+    // Determine the period (AM/PM)
+    if (hours === 0) {
+      hours = 12; // Midnight case
+    } else if (hours === 12) {
+      period = 'PM'; // Noon case
+    } else if (hours > 12) {
+      hours -= 12; // Convert PM hours to 12-hour format
+      period = 'PM';
+    }
+
+    // Format hours to ensure two digits (e.g., 03 instead of 3)
+    hours = hours < 10 ? '0' + hours : hours;
+
+    return `${hours}:${minutes}:${seconds} ${period}`;
+  }
 
 
   return (
@@ -321,7 +345,7 @@ function Dashboard() {
               </Col>
             </Row>
 
-            <Row className='location-overview'>
+            {/* <Row className='location-overview'>
               <h4>LOCATION OVERVIEW</h4>
               <div className="map-container">
                 <ReactMapGL
@@ -341,6 +365,49 @@ function Dashboard() {
                 </ReactMapGL>
               </div>
               
+            </Row> */}
+            <Row className='report-overview'>
+              <h4>REPORTS</h4>
+              <div className="report-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Renter ID</th>
+                      <th>Nature of Issue</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th className='text-center'>Emergency</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {carUpdates.length > 0 ? (
+                      carUpdates
+                      .sort((a, b) => new Date(b.date) - new Date(a.date))  // Sorting by date from most recent to oldest
+                      .slice(0, 8)
+                      .map((report) => {
+                        const validDate = new Date(report.date);
+                        const formattedDate = validDate instanceof Date && !isNaN(validDate) ? validDate.toLocaleDateString() : 'Invalid Date';
+
+                        const emergencyStatus = report.emergency === 'y' ? 'Yes' : report.emergency === 'n' ? 'No' : '';
+
+                        return (
+                          <tr key={report.report_id}>
+                            <td>{report.renter_id}</td>
+                            <td>{report.nature_of_issue}</td>
+                            <td>{formattedDate}</td>
+                            <td>{convertTo12Hour(report.time)}</td>
+                            <td className='text-center'>{emergencyStatus}</td>
+                          </tr>
+                        );
+                        })
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="text-center" style={{ height: '200px', verticalAlign: 'middle' }}>No reports available.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </Row>
           </Col>
 
@@ -447,7 +514,7 @@ function Dashboard() {
 
         </Row>
 
-        <div className="notification-list">
+        {/* <div className="notification-list">
           {notifications.length > 0 ? (
             notifications.map((notification) => (
               <div 
@@ -461,7 +528,7 @@ function Dashboard() {
           ) : (
             <p>No new notifications</p>
           )}
-        </div>
+        </div> */}
 
       </div>
     </div>

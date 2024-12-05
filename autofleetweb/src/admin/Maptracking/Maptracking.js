@@ -79,7 +79,7 @@ function Maptracking() {
         setViewState({
             longitude: 120.962852,
             latitude: 14.619343,
-            zoom: 12,
+            zoom: 18,
             transitionDuration: 1000,  // Optional: adds a smooth transition effect
         });
         setMarkerPosition(null);
