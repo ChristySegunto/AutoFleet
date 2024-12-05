@@ -262,7 +262,10 @@
     height: 200px;
 }
 
-.Dashboard .location-overview{
+.Dashboard .report-overview{
+    display: flex;
+    align-content: flex-start;
+    flex: 1;
     background-color: #fff;
     margin: 0;
     border-radius: 15px;
@@ -270,9 +273,10 @@
     margin-right: 10px;
     box-shadow: 0px 4px 40px 6px rgba(0, 0, 0, 0.02);
     padding: 10px;
+
 }
 
-.Dashboard .location-overview h4{
+.Dashboard .report-overview h4{
     color: #A2A2A2;
     font-family: Poppins;
     font-size: 1.1rem;
@@ -280,6 +284,30 @@
     font-weight: 600;
     line-height: normal;
 }
+
+.Dashboard .report-container .table thead tr{
+    border: #C6C6C6 !important;
+    border-width: 1px !important;
+}
+
+.Dashboard .report-container .table th{
+    color: #A6A6A6;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.Dashboard .report-container .table td{
+    color: #A6A6A6;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+}
+
+
+
 
 .Dashboard .location-overview-custom{
     height: 400px;
