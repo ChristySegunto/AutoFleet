@@ -1,3 +1,6 @@
+// THIS FILE IS A SIDEBAR COMPONENT
+
+//React Imports
 import React, { useState, useEffect } from "react";
 import {
     CDBSidebar,
@@ -16,6 +19,7 @@ import { Image } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
+//Images
 import logo from './../img/logo.png';
 
 const Sidebar = () => {

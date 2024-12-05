@@ -1,28 +1,31 @@
+//MAINTENANCE PAGE
+//React Imports
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-
-//Design
-import { Form, Button, Alert, Modal, Container, Row, Col } from 'react-bootstrap';
-import { FaBell, FaSearch, FaUser } from 'react-icons/fa';
-
 import { AuthContext } from './../../settings/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
+
+
+//Bootstrap imports
+import { Form, Button, Alert, Modal, Container, Row, Col } from 'react-bootstrap';
+import { FaBell, FaSearch, FaUser } from 'react-icons/fa';
 
 import './Maintenance.css'
 
 function Maintenance() {
   const { user, adminDetails, setAdminDetails } = useContext(AuthContext); // Access user and setAdminDetails from context
-  const [showModal, setShowModal] = useState(false);
-  const [plateNumbers, setPlateNumbers] = useState([]);
-  const [maintenanceList, setMaintenanceList] = useState([]);
-  // const [plateDetails, setPlateDetails] = useState([]);
-  const [selectedCarModel, setSelectedCarModel] = useState("");
-  const [maintenanceType, setMaintenanceType] = useState([]);
-  const [dueDate, setDueDate] = useState("");
-  const [nextDueDate, setNextDueDate] = useState("");
-  const [selectedPlate, setSelectedPlate] = useState("");
-  const [vehicleId, setVehicleId] = useState("");
+  const [showModal, setShowModal] = useState(false); // for modal handling
+  const [plateNumbers, setPlateNumbers] = useState([]); // for platenumbers handling
+  const [maintenanceList, setMaintenanceList] = useState([]); // for maintenance list handling
+  const [selectedCarModel, setSelectedCarModel] = useState(""); // for selected car model handling
+  const [maintenanceType, setMaintenanceType] = useState([]); // for maintenance type handling
+  const [dueDate, setDueDate] = useState(""); // for due date handling
+  const [nextDueDate, setNextDueDate] = useState(""); // for next due date handling
+  const [selectedPlate, setSelectedPlate] = useState(""); // for selected plate handling
+  const [vehicleId, setVehicleId] = useState(""); // for vehicle id handling
 
+
+  //declare maintenance intervals
   const maintenanceIntervals = {
     "Oil Change": 90, // 90 days (3 months)
     "Tire Rotation": 180, // 180 days (6 months)
@@ -32,52 +35,57 @@ function Maintenance() {
     "Transmission Service": 365, // 365 days (1 year)
   };
 
+  //declare statuscolors
   const statusColors = {
-    "Pending": "#CC3C3C",
-    "Under Maintenance": "#767676",
-    "Completed": "#68B031",
+    "Pending": "#CC3C3C", // set the color for pending
+    "Under Maintenance": "#767676", // set the color for under maintenance
+    "Completed": "#68B031", // set the color for completed
   };
 
-  const statusBgColors = {
-    "Pending": "#FFD9D9",
-    "Under Maintenance": "#E6E6E6",
-    "Completed": "#D1F1B9",
-  };
+  // const statusBgColors = {
+  //   "Pending": "#FFD9D9",
+  //   "Under Maintenance": "#E6E6E6",
+  //   "Completed": "#D1F1B9",
+  // };
 
+  
   const getStatusColor = (status) => statusColors[status] || "gray";
 
+  //function for displaying modal
+  const handleShow = () => setShowModal(true); // if handleshow was called, the showmodal is true
+  const handleClose = () => setShowModal(false); // if handleclose was called, the showmodal is false
 
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => setShowModal(false);
-
+  // fetch plate numbers
   useEffect(() => {
-    axios.get('http://localhost:5028/api/Maintenance/plateNumbers') // Adjust the URL as needed
+    axios.get('http://localhost:5028/api/Maintenance/plateNumbers') // API endpoint of fetching the plate numbers
       .then(response => {
-        setPlateNumbers(response.data);
+        setPlateNumbers(response.data); //set reponse data as platenumber
       })
       .catch(error => {
-        console.error("Error fetching plate numbers:", error);
+        console.error("Error fetching plate numbers:", error); // display error in console
       });
   }, []);
 
+  //fetch maintenance list
   useEffect(() => {
     axios.get('http://localhost:5028/api/Maintenance/list') // Adjust the URL as needed
       .then(response => {
-        setMaintenanceList(response.data);
+        setMaintenanceList(response.data); // set response as maintenancelist
       })
       .catch(error => {
-        console.error("Error fetching maintenance list:", error);
+        console.error("Error fetching maintenance list:", error); // display error in console
       });
   }, []);
 
+  // to handle changing or plates
   const handlePlateChange = (event) => {
     const selectedPlate = event.target.value;
     console.log("Selected Plate:", selectedPlate); // Log to check
 
-    const selectedCar = plateNumbers.find(p => p.plate_number === selectedPlate);
+    const selectedCar = plateNumbers.find(p => p.plate_number === selectedPlate); // find the car of selected plate
     
     if (selectedCar) {
-        setSelectedCarModel(selectedCar.car_model);
+        setSelectedCarModel(selectedCar.car_model); // update the selected car model
         setSelectedPlate(selectedPlate); // Update the selected plate here
         setVehicleId(selectedCar.vehicle_id); // Set the vehicle_id here
 
@@ -85,10 +93,11 @@ function Maintenance() {
     } else {
         setSelectedCarModel("");
         setVehicleId(null); // Clear vehicle_id if no plate is selected
-        console.log("No car selected, resetting vehicle ID.");
+        console.log("No car selected, resetting vehicle ID."); // display the message in console log
     }
   };
 
+  // to handle the change of maintenance type
   const handleMaintenanceTypeChange = (e) => {
     const type = e.target.value;
     console.log("Selected Maintenance Type:", type); // Log to check
@@ -127,6 +136,8 @@ function Maintenance() {
       alert("Please fill all required fields.");
       return;
     }
+
+    // declare new maintenance
     const newMaintenance = {
       car_model: selectedCarModel,
       maintenance_due_date: dueDate,
@@ -139,8 +150,8 @@ function Maintenance() {
 
     console.log("New Maintenance Data:", newMaintenance);
 
-    // Send POST request to your backend
-    axios.post('http://localhost:5028/api/Maintenance/addMaintenance', newMaintenance)
+    // Send POST request to backend
+    axios.post('http://localhost:5028/api/Maintenance/addMaintenance', newMaintenance) // API endpoint for adding new maintenance
       .then(response => {
         alert("Maintenance added successfully!");
         setShowModal(false); // Close modal on success
