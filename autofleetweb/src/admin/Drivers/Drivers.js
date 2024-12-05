@@ -7,9 +7,13 @@ import { AuthContext } from './../../settings/AuthContext.js';
 import { FaUser } from 'react-icons/fa';
 
 const Drivers = () => {
+  // Context hook to access admin details from authentication context
   const { adminDetails } = useContext(AuthContext);
+  // Selected driver for detailed view
   const [selectedDriver, setSelectedDriver] = useState(null);
+  // Search query for filtering drivers
   const [searchQuery, setSearchQuery] = useState('');
+  // Modal state controls for different stages of renter creation
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -39,18 +43,19 @@ const Drivers = () => {
     confirmPassword: ''
   });
 
+  // State to manage password-related errors
   const [passwordError, setPasswordError] = useState('');
-
+  // Effect hook to fetch renter list when component mounts
   useEffect(() => {
     fetchRenterList();
   }, []);
-
+  // Effect hook to fetch recent trips when a driver is selected
   useEffect(() => {
     if (selectedDriver) {
       fetchRecentTrips(selectedDriver.renter_id);
     }
   }, [selectedDriver]);
-
+  // Function to fetch the list of renters from the backend
   const fetchRenterList = async () => {
     try {
       const response = await axios.get('http://localhost:5028/api/Renter/list');
@@ -60,7 +65,7 @@ const Drivers = () => {
       alert("Failed to fetch renters");
     }
   };
-
+  // Function to fetch recent trips for a specific renter
   const fetchRecentTrips = async (renterId) => {
     try {
       const response = await axios.get(`http://localhost:5028/api/Home/recent-trips/${renterId}`);
@@ -70,7 +75,7 @@ const Drivers = () => {
       alert('Failed to fetch recent trips');
     }
   };
-
+  // Function to check if an email is unique in the system
   const checkEmailUniqueness = async (emailToCheck) => {
     try {
       const response = await axios.get(`http://localhost:5028/api/Renter/check-email?email=${emailToCheck}`);
@@ -80,7 +85,7 @@ const Drivers = () => {
       return false;
     }
   };
-
+  // Function to handle email verification before account creation
   const handleEmailVerification = async () => {
     setEmailTouched(true);
     setEmailError('');
@@ -110,7 +115,7 @@ const Drivers = () => {
       setEmailError('Error verifying email');
     }
   };
-
+  // Function to handle form input changes for account creation
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -118,7 +123,7 @@ const Drivers = () => {
       [name]: value
     }));
   };
-
+  // Function to submit and create a new renter account
   const handleSubmitAccount = async (e) => {
     e.preventDefault();
     setPasswordError('');
@@ -133,7 +138,7 @@ const Drivers = () => {
       setPasswordError("Password must be at least 8 characters");
       return;
     }
-
+    // Prepare renter details object
     const newRenter = {
       renter_fname: renterFname,
       renter_mname: renterMname,
@@ -143,15 +148,9 @@ const Drivers = () => {
       renter_email: renterEmail,
       renter_emergency_contact: renterEmergencyContact,
       renter_address: renterAddress,
-      // renter_id_photo_1: renterIdPhoto,
-      // password: formData.password
     };
 
-    // const formDataToSend = new FormData();
-    // if (renterIdPhoto) {
-    //   formDataToSend.append('renter_id_photo', renterIdPhoto); // Attach file
-    // }
-
+    // Prepare account credentials
     const newAcc = {
       email: renterEmail,
       password: formData.password,
@@ -182,7 +181,7 @@ const Drivers = () => {
       alert(error.response?.data || "Failed to add renter");
     }
   };
-
+  // Function to reset all form fields after submission
   const resetFormFields = () => {
     setRenterFname("");
     setRenterMname("");
@@ -200,7 +199,7 @@ const Drivers = () => {
     });
     setEmail('');
   };
-
+  // Function to filter drivers based on search query
   const filteredDrivers = renterList.filter(driver =>
     driver.renter_fname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     driver.renter_mname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -208,16 +207,10 @@ const Drivers = () => {
     driver.renter_email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // const handleFileChange = (e) => {
-  //   const file = e.target.files[0]; // Get the first file selected
-  //   if (file) {
-  //     setRenterIdPhoto(file); // Save the file to the state
-  //   }
-  // };
-  
+  // Render method - main component UI
   return (
     <div className="drivers-container">
-      {/* Header */}
+      {/* Header section with admin details */}
       <header className="header">
         <div className="header-content">
           <div className="vehicle-header">
@@ -240,6 +233,7 @@ const Drivers = () => {
         <div className="content-wrapper">
           {/* Left Panel - Driver List */}
           <div className="driver-list">
+            {/* Search input for filtering drivers */}
             <div className="search-container">
               <i className="fas fa-search dsearch-icon"></i>
               <input
@@ -250,7 +244,7 @@ const Drivers = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-
+            {/* Button to add new renter */}
             <div className="add-schedule-container">
             <button 
             className="add-schedule-btn" 
@@ -259,7 +253,7 @@ const Drivers = () => {
             Add Renter
           </button>
             </div>
-
+            {/* Grid of driver cards */}
             <div className="drivers-grid">
               {filteredDrivers.map((driver) => (
                 <div
@@ -273,7 +267,6 @@ const Drivers = () => {
                       <div className="drivers-name">{driver.renter_fname} {driver.renter_mname} {driver.renter_lname}</div>
                       <div className="driver-email">{driver.renter_email}</div>
                     </div>
-
                   </div>
                 </div>
               ))}
@@ -286,7 +279,6 @@ const Drivers = () => {
               <div className="details-card">
                 <div className="driver-header">{selectedDriver.renter_fname} {selectedDriver.renter_mname} {selectedDriver.renter_lname}</div>
                 <div className="reg-number">Birthday: {selectedDriver.birthDay}</div>
-
                 <div className="details-content">
                   {selectedDriver.renter_contact_num && (
                     <div className="info-section">
@@ -296,17 +288,6 @@ const Drivers = () => {
                       <div>Emergency Contact: {selectedDriver.renter_emergency_contact}</div>
                     </div>
                   )}
-
-                  {/* {selectedDriver.pickupLocation && (
-                    <div className="info-section">
-                      <div>Pick up Location: {selectedDriver.pickupLocation}</div>
-                      <div>Pick up Date: {selectedDriver.pickupDate}</div>
-                      <div>Pick up Time: {selectedDriver.pickupTime}</div>
-                      <div>Dropoff Location: {selectedDriver.dropoffLocation}</div>
-                      <div>Dropoff Date: {selectedDriver.dropoffDate}</div>
-                      <div>Dropoff Time: {selectedDriver.dropoffTime}</div>
-                    </div>
-                  )} */}
 
                   {recentTrips.length > 0 ? (
                     <div className="recent-trips">
@@ -325,13 +306,10 @@ const Drivers = () => {
                         <div className="no-recent-trips">No recent trips</div>
                       </div>
                     )}
-
                 </div>
               </div>
             </div>
           )}
-
-
         </div>
       </main>
 
