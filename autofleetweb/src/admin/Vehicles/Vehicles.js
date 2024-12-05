@@ -5,6 +5,151 @@ import axios from 'axios';  // Import Axios for API requests
 import { AuthContext } from './../../settings/AuthContext.js';  // Import AuthContext to get authentication data
 import './Vehicles.css';  // Import the CSS file for styling
 
+const exportVehiclesToPdf = (vehicles) => {
+  // Create a new window for printing
+  const printWindow = window.open('', '', 'width=900,height=700');
+  
+  // Start HTML content
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Vehicle Fleet Report</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Quicksand:wght@400&display=swap" rel="stylesheet">
+        <style>
+          body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #FFFAF7;
+          }
+          .vehicles-container {
+            background-color: #FFFAF7;
+          }
+          table { 
+            width: 100%; 
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+          }
+          th, td { 
+            padding: 5px;
+            text-align: center;
+            font-size: 14px;
+            color: #A2A2A2;
+            font-family: 'Quicksand', sans-serif;
+          }
+          th { 
+            border-bottom: 1px solid #a2a2a2;
+            font-weight: normal;
+            background-color: #fff;
+          }
+          h1 { 
+            text-align: center; 
+            color: #FF6A18; 
+            margin: 0 0 20px 0;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+          }
+          .status {
+            min-width: 90px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 13px;
+            padding: .375rem .75rem;
+            font-weight: 400;
+            line-height: 1.5;
+          }
+          .status.repair {
+            background-color: #FFD9D9;
+            color: #CC3C3C;
+          }
+          .status.inactive {
+            background-color: #E6E6E6;
+            color: #767676;
+          }
+          .status.active {
+            background-color: #D1F1B9;
+            color: #68B031;
+          }
+          .status.pending {
+            background-color: #FFD9D9;
+            color: #CC3C3C;
+          }
+          .status.rented {
+            background-color: #FBD8C6;
+            color: #FF6A18;
+          }
+          .status.under-maintenance {
+            background-color: #E6E6E6;
+            color: #767676;
+          }
+          .status.available {
+            background-color: #D1F1B9;
+            color: #68B031;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="vehicles-container">
+          <h1>Vehicle Fleet Report</h1>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Manufacturer</th>
+                  <th>Model</th>
+                  <th>Plate Number</th>
+                  <th>Year</th>
+                  <th>Color</th>
+                  <th>Fuel Type</th>
+                  <th>Transmission</th>
+                  <th>Seats</th>
+                  <th>Category</th>
+                  <th>Total Mileage</th>
+                  <th>Fuel Consumption</th>
+                  <th>Distance Traveled</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${vehicles.map(vehicle => `
+                  <tr class="vehicle-row">
+                    <td>${vehicle.vehicle_id}</td>
+                    <td>${vehicle.car_manufacturer}</td>
+                    <td>${vehicle.car_model}</td>
+                    <td>${vehicle.plate_number}</td>
+                    <td>${vehicle.manufacture_year}</td>
+                    <td>${vehicle.vehicle_color}</td>
+                    <td>${vehicle.fuel_type}</td>
+                    <td>${vehicle.transmission_type}</td>
+                    <td>${vehicle.seating_capacity}</td>
+                    <td>${vehicle.vehicle_category}</td>
+                    <td>${vehicle.total_mileage}</td>
+                    <td>${vehicle.total_fuel_consumption}</td>
+                    <td>${vehicle.distance_traveled}</td>
+                    <td>
+                      <span class="status ${vehicle.vehicle_status.toLowerCase().replace(' ', '-')}">
+                        ${vehicle.vehicle_status}
+                      </span>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+  
+  // Close the document writing
+  printWindow.document.close();
+  
+  // Trigger the browser's print dialog, which allows saving as PDF
+  printWindow.print();
+};
+
 const Vehicles = () => {
   // Access user and admin details from AuthContext
   const { user, adminDetails, setAdminDetails } = useContext(AuthContext);
@@ -239,6 +384,9 @@ const Vehicles = () => {
       <div className="header-row">
         <h3 className="list-header">LIST OF VEHICLES</h3>
         <div className="action-buttons">
+          <Button className="export-btn" onClick={() => exportVehiclesToPdf(vehicles)}>
+            EXPORT
+          </Button>
           <Button className='add-vehicle-btn' onClick={handleShow}>
             ADD VEHICLE
           </Button>
