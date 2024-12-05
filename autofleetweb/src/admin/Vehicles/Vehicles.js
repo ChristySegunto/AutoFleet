@@ -341,7 +341,10 @@ const Vehicles = () => {
             <Form>
               {(modalMode === 'add' || modalMode === 'edit') && (
                 <>
+                  <Modal.Title className="modal-vehicle-title">VEHICLE INFO</Modal.Title>
+
                   <Row md={2}>
+                    
                     <Form.Group as={Col} className="modal-vehicle-formgroup" controlId="plateNumber">
                       <Form.Label className="modal-vehicle-label">Plate Number</Form.Label>
                       <Form.Control 
