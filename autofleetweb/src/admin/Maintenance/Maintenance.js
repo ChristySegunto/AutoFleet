@@ -186,6 +186,23 @@ function Maintenance() {
         alert(`Failed to update status: ${error.response?.data || error.message}`);
       });
   };
+
+  const handleDelete = (maintenance_id) => {
+    // Confirm if the user really wants to delete the maintenance record
+    if (window.confirm("Are you sure you want to delete this maintenance record?")) {
+      // Send a DELETE request to the backend
+      axios.delete(`http://localhost:5028/api/Maintenance/delete/${maintenance_id}`)
+        .then(() => {
+          // Update the local state by filtering out the deleted maintenance record
+          setMaintenanceList(prevList => prevList.filter(item => item.maintenance_id !== maintenance_id));
+          alert("Maintenance record deleted successfully!");
+        })
+        .catch(error => {
+          console.error("Error deleting maintenance:", error);
+          alert(`Failed to delete maintenance: ${error.response?.data || error.message}`);
+        });
+    }
+  };
   
 
   return (
@@ -248,7 +265,10 @@ function Maintenance() {
                       </Form.Control>
                     </td>
                     <td className='text-center'>
-                      <i className="fas fa-trash" style={{ cursor: 'pointer'}}></i>
+                      <i className="fas fa-trash" 
+                          style={{ cursor: 'pointer'}} 
+                          onClick={() => handleDelete(maintenance.maintenance_id)} // Trigger delete on click
+                      ></i>
                     </td>
                   </tr>
                 ))
