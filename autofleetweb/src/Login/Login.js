@@ -1,20 +1,25 @@
+//LOGIN FILE
+//React Imports
 import React, { useState, useEffect, useContext } from "react";
 import './Login.css'
 import { useNavigate } from 'react-router-dom'; // Import Redirect from React Router
+import { AuthContext } from "../settings/AuthContext";
 
 
 //Bootstrap
 import { Form, Button, Alert, Modal, Container } from 'react-bootstrap';
+
+//Image
 import logo from './../img/logo.png';
-import { AuthContext } from "../settings/AuthContext";
 
 const Login = () => {
+    //Declarations
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate();
-    const { login, setAdminDetails } = useContext(AuthContext);
+    const navigate = useNavigate(); // For navigation
+    const { login, setAdminDetails } = useContext(AuthContext); //To save or fetch details
 
 
     const handleSubmit = async (e) => {
@@ -22,6 +27,7 @@ const Login = () => {
         setError('');
 
         try {
+            //Check the login credentials
             const response = await fetch('http://localhost:5028/api/login/login', {
                 method: 'POST',
                 headers: {
@@ -54,7 +60,7 @@ const Login = () => {
                     token: data.token 
                 }); 
 
-                alert('Login Successful.')
+                alert('Login Successful.') //Display alert
                 navigate('/dashboard'); // Navigate to dashboard for admin
             } else {
                 setError('You do not have access to this application.'); // Set error for non-admin roles
@@ -84,7 +90,9 @@ const Login = () => {
 
                     {error && <Alert variant="danger">{error}</Alert>} 
 
+                    {/* Login form */}
                     <form onSubmit={handleSubmit}>
+                        {/* Email textbox */}
                         <div className="form-group email-form mb-3">
                             <label>Email</label>
                             <input 
@@ -97,6 +105,7 @@ const Login = () => {
                             />
                         </div>
 
+                        {/* Password textbox */}
                         <div className="form-group pass-form mb-3">
                             <label htmlFor="password">Password</label>
                             <input 
@@ -109,10 +118,7 @@ const Login = () => {
                             />
                         </div>
 
-                        {/* <div className="forgot-pass text-center">
-                            <a href="#" className="medium">Forgot Password?</a>
-                        </div> */}
-
+                        {/* Submit button */}
                         <div className="d-flex justify-content-center">
                             <button type="submit" className="btn btn-primary w-50 mt-5 mb-3">LOGIN</button>
                         </div>
